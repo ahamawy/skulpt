@@ -523,6 +523,41 @@ h3 {
     }
 }
 
+/* Multi-slot class styles */
+.class-cell.multi-slot-start {
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.class-cell.multi-slot-middle {
+    border-top: none;
+    border-bottom: none;
+    border-radius: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.class-cell.multi-slot-end {
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding-top: 2px;
+}
+
+.class-cell.multi-slot-start .class-info,
+.class-cell.multi-slot-middle .class-info,
+.class-cell.multi-slot-middle .teacher-name,
+.class-cell.multi-slot-middle .class-name {
+    display: none;
+}
+
+.class-cell.multi-slot-middle {
+    background: linear-gradient(to bottom, 
+        rgba(211, 183, 163, 0.15) 0%, 
+        rgba(211, 183, 163, 0.15) 100%);
+}
+
 
 .class-cell.movement-room {
     border-left: 3px solid var(--movement-color);
@@ -861,6 +896,31 @@ h3 {
 }
 
 .level-pill.active {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--primary);
+}
+
+.duration-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.duration-pill {
+    padding: 6px 16px;
+    border: 2px solid var(--background);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all var(--animation-duration) var(--animation-easing);
+    font-size: 0.875rem;
+}
+
+.duration-pill:hover {
+    border-color: var(--accent);
+}
+
+.duration-pill.active {
     background-color: var(--accent);
     border-color: var(--accent);
     color: var(--primary);

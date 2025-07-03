@@ -495,27 +495,50 @@ class SkulptApp {
                 movementCell.className = 'class-cell movement-room';
                 movementCell.onclick = () => this.openModal(day, time, movementCell, 'movement');
                 
-                const movementClass = this.movementSchedule[day] && this.movementSchedule[day][time];
-                if (movementClass && this.isClassActive(movementClass)) {
-                    movementCell.classList.add('filled');
-                    const typeClass = movementClass.type === 'Ladies Only' ? 'ladies' : '';
-                    movementCell.innerHTML = `
-                        <div class="class-name">${movementClass.class}</div>
-                        <div class="teacher-name">${movementClass.teacher}</div>
-                        <div class="class-info">
-                            <span class="class-level">${movementClass.level}</span>
-                            <span class="class-type ${typeClass}">${movementClass.type}</span>
-                        </div>
-                    `;
-                } else if (movementClass && !this.isClassActive(movementClass)) {
-                    movementCell.classList.add('future');
-                    const startDate = new Date(movementClass.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    movementCell.innerHTML = `
-                        <div class="class-name future-class">${movementClass.class}</div>
-                        <div class="class-future">Starts ${startDate}</div>
-                    `;
+                // Check if this slot is part of a multi-slot class
+                const multiSlotInfo = this.isMultiSlotOccupied(day, time, 'movement');
+                
+                if (multiSlotInfo.occupied) {
+                    movementCell.classList.add('filled', `multi-slot-${multiSlotInfo.position}`);
+                    movementCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
+                    movementCell.onclick = null; // Disable clicking on occupied slots
                 } else {
-                    movementCell.innerHTML = '<span class="empty-cell">+</span>';
+                    const movementClass = this.movementSchedule[day] && this.movementSchedule[day][time];
+                    if (movementClass && this.isClassActive(movementClass)) {
+                        movementCell.classList.add('filled');
+                        
+                        // Check if this is a multi-slot class
+                        if (movementClass.duration > 15) {
+                            const slotsNeeded = Math.ceil(movementClass.duration / 15);
+                            movementCell.classList.add('multi-slot-start');
+                            
+                            // Mark subsequent slots
+                            for (let i = 1; i < slotsNeeded && i + this.timeSlots.indexOf(time) < this.timeSlots.length; i++) {
+                                const nextSlotIndex = this.timeSlots.indexOf(time) + i;
+                                const position = i === slotsNeeded - 1 ? 'end' : 'middle';
+                                // We'll mark these in the next iterations
+                            }
+                        }
+                        
+                        const typeClass = movementClass.type === 'Ladies Only' ? 'ladies' : '';
+                        movementCell.innerHTML = `
+                            <div class="class-name">${movementClass.class}</div>
+                            <div class="teacher-name">${movementClass.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${movementClass.level}</span>
+                                <span class="class-type ${typeClass}">${movementClass.type}</span>
+                            </div>
+                        `;
+                    } else if (movementClass && !this.isClassActive(movementClass)) {
+                        movementCell.classList.add('future');
+                        const startDate = new Date(movementClass.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        movementCell.innerHTML = `
+                            <div class="class-name future-class">${movementClass.class}</div>
+                            <div class="class-future">Starts ${startDate}</div>
+                        `;
+                    } else {
+                        movementCell.innerHTML = '<span class="empty-cell">+</span>';
+                    }
                 }
                 
                 // Reformer room cell
@@ -523,27 +546,42 @@ class SkulptApp {
                 reformerCell.className = 'class-cell reformer-room';
                 reformerCell.onclick = () => this.openModal(day, time, reformerCell, 'reformer');
                 
-                const reformerClass = this.reformerSchedule[day] && this.reformerSchedule[day][time];
-                if (reformerClass && this.isClassActive(reformerClass)) {
-                    reformerCell.classList.add('filled');
-                    const typeClass = reformerClass.type === 'Ladies Only' ? 'ladies' : '';
-                    reformerCell.innerHTML = `
-                        <div class="class-name">${reformerClass.class}</div>
-                        <div class="teacher-name">${reformerClass.teacher}</div>
-                        <div class="class-info">
-                            <span class="class-level">${reformerClass.level}</span>
-                            <span class="class-type ${typeClass}">${reformerClass.type}</span>
-                        </div>
-                    `;
-                } else if (reformerClass && !this.isClassActive(reformerClass)) {
-                    reformerCell.classList.add('future');
-                    const startDate = new Date(reformerClass.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    reformerCell.innerHTML = `
-                        <div class="class-name future-class">${reformerClass.class}</div>
-                        <div class="class-future">Starts ${startDate}</div>
-                    `;
+                // Check if this slot is part of a multi-slot class
+                const reformerMultiSlotInfo = this.isMultiSlotOccupied(day, time, 'reformer');
+                
+                if (reformerMultiSlotInfo.occupied) {
+                    reformerCell.classList.add('filled', `multi-slot-${reformerMultiSlotInfo.position}`);
+                    reformerCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
+                    reformerCell.onclick = null; // Disable clicking on occupied slots
                 } else {
-                    reformerCell.innerHTML = '<span class="empty-cell">+</span>';
+                    const reformerClass = this.reformerSchedule[day] && this.reformerSchedule[day][time];
+                    if (reformerClass && this.isClassActive(reformerClass)) {
+                        reformerCell.classList.add('filled');
+                        
+                        // Check if this is a multi-slot class
+                        if (reformerClass.duration > 15) {
+                            reformerCell.classList.add('multi-slot-start');
+                        }
+                        
+                        const typeClass = reformerClass.type === 'Ladies Only' ? 'ladies' : '';
+                        reformerCell.innerHTML = `
+                            <div class="class-name">${reformerClass.class}</div>
+                            <div class="teacher-name">${reformerClass.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${reformerClass.level}</span>
+                                <span class="class-type ${typeClass}">${reformerClass.type}</span>
+                            </div>
+                        `;
+                    } else if (reformerClass && !this.isClassActive(reformerClass)) {
+                        reformerCell.classList.add('future');
+                        const startDate = new Date(reformerClass.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        reformerCell.innerHTML = `
+                            <div class="class-name future-class">${reformerClass.class}</div>
+                            <div class="class-future">Starts ${startDate}</div>
+                        `;
+                    } else {
+                        reformerCell.innerHTML = '<span class="empty-cell">+</span>';
+                    }
                 }
             });
         });
@@ -639,6 +677,17 @@ class SkulptApp {
             opt.onclick = () => this.selectType(opt.dataset.type);
         });
         
+        // Duration selection
+        document.querySelectorAll('.duration-pill').forEach(pill => {
+            pill.onclick = () => this.selectDuration(parseInt(pill.dataset.duration));
+        });
+        
+        // Set default duration
+        this.selectedDuration = existingClass?.duration || 15;
+        document.querySelectorAll('.duration-pill').forEach(pill => {
+            pill.classList.toggle('active', parseInt(pill.dataset.duration) === this.selectedDuration);
+        });
+        
         modal.style.display = 'flex';
     }
 
@@ -668,6 +717,13 @@ class SkulptApp {
         });
     }
 
+    selectDuration(duration) {
+        this.selectedDuration = duration;
+        document.querySelectorAll('.duration-pill').forEach(pill => {
+            pill.classList.toggle('active', parseInt(pill.dataset.duration) === duration);
+        });
+    }
+
     closeModal() {
         document.getElementById('editModal').style.display = 'none';
         this.currentCell = null;
@@ -687,12 +743,31 @@ class SkulptApp {
                 class: this.selectedClass,
                 teacher: teacherValue,
                 level: this.selectedLevel,
-                type: this.selectedType
+                type: this.selectedType,
+                duration: this.selectedDuration || 15
             };
             
             // Add start date if specified
             if (startDate) {
                 classData.startDate = startDate;
+            }
+            
+            // Check if class duration would overlap with existing classes
+            if (this.selectedDuration > 15) {
+                const overlappingSlots = this.getOverlappingSlots(
+                    this.currentCell.day,
+                    this.currentCell.time,
+                    this.selectedDuration,
+                    this.currentCell.room
+                );
+                
+                // Check if any overlapping slots are already occupied
+                for (const slot of overlappingSlots) {
+                    if (schedule[this.currentCell.day] && schedule[this.currentCell.day][slot]) {
+                        this.showNotification('Cannot add class - it would overlap with existing classes', 'error');
+                        return;
+                    }
+                }
             }
             
             schedule[this.currentCell.day][this.currentCell.time] = classData;
@@ -1074,6 +1149,93 @@ class SkulptApp {
                 }
             });
         }
+
+        // 5. Skill Level Breakdown
+        const skillCtx = document.getElementById('skillLevelChart');
+        if (skillCtx) {
+            const skillChart = Chart.getChart('skillLevelChart');
+            if (skillChart) skillChart.destroy();
+
+            const skillCounts = {
+                'Beginner': 0,
+                'Intermediate': 0,
+                'Advanced': 0,
+                'Teens': 0
+            };
+
+            // Count skill levels from both schedules
+            [this.movementSchedule, this.reformerSchedule].forEach(schedule => {
+                Object.values(schedule).forEach(day => {
+                    Object.values(day).forEach(classData => {
+                        const level = classData.level || 'Intermediate';
+                        if (skillCounts.hasOwnProperty(level)) {
+                            skillCounts[level]++;
+                        }
+                    });
+                });
+            });
+
+            // Filter out levels with 0 count
+            const filteredLabels = [];
+            const filteredData = [];
+            Object.entries(skillCounts).forEach(([level, count]) => {
+                if (count > 0) {
+                    filteredLabels.push(level);
+                    filteredData.push(count);
+                }
+            });
+
+            new Chart(skillCtx, {
+                type: 'pie',
+                data: {
+                    labels: filteredLabels,
+                    datasets: [{
+                        data: filteredData,
+                        backgroundColor: ['#E8E2D6', '#D3B7A3', '#7D7A78', '#A89F9A'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 11 },
+                                color: '#4A4A4A',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(0);
+                                        return {
+                                            text: label + ' (' + value + ' - ' + percentage + '%)',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return context.label + ': ' + value + ' classes (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 
     animateValue(id, start, end, duration) {
@@ -1098,6 +1260,55 @@ class SkulptApp {
 
         timer = setInterval(run, stepTime);
         run();
+    }
+
+    getOverlappingSlots(day, startTime, duration, room) {
+        const overlappingSlots = [];
+        const startIndex = this.timeSlots.indexOf(startTime);
+        
+        if (startIndex === -1) return overlappingSlots;
+        
+        const slotsNeeded = Math.ceil(duration / 15);
+        
+        // Get the slots that would be occupied (excluding the first one)
+        for (let i = 1; i < slotsNeeded && startIndex + i < this.timeSlots.length; i++) {
+            overlappingSlots.push(this.timeSlots[startIndex + i]);
+        }
+        
+        return overlappingSlots;
+    }
+
+    getClassDuration(day, time, room) {
+        const schedule = room === 'movement' ? this.movementSchedule : this.reformerSchedule;
+        const classData = schedule[day] && schedule[day][time];
+        return classData ? (classData.duration || 15) : 0;
+    }
+
+    isMultiSlotOccupied(day, time, room) {
+        const schedule = room === 'movement' ? this.movementSchedule : this.reformerSchedule;
+        const timeIndex = this.timeSlots.indexOf(time);
+        
+        // Check if this slot is occupied by a multi-slot class from a previous time
+        for (let i = Math.max(0, timeIndex - 5); i < timeIndex; i++) {
+            const prevTime = this.timeSlots[i];
+            const prevClass = schedule[day] && schedule[day][prevTime];
+            
+            if (prevClass && prevClass.duration > 15) {
+                const slotsNeeded = Math.ceil(prevClass.duration / 15);
+                const endIndex = i + slotsNeeded - 1;
+                
+                if (timeIndex <= endIndex) {
+                    return {
+                        occupied: true,
+                        startTime: prevTime,
+                        position: timeIndex === i ? 'start' : (timeIndex === endIndex ? 'end' : 'middle'),
+                        classData: prevClass
+                    };
+                }
+            }
+        }
+        
+        return { occupied: false };
     }
 
     toggleExportMenu() {
