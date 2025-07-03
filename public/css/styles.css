@@ -448,7 +448,7 @@ h3 {
 
 .schedule-table th,
 .schedule-table td {
-    padding: calc(var(--spacing-unit) * 2);
+    padding: calc(var(--spacing-unit) * 1);
     text-align: center;
     border: 1px solid rgba(0,0,0,0.05);
 }
@@ -492,7 +492,7 @@ h3 {
     background-color: var(--background);
     font-weight: var(--heading-weight);
     color: var(--secondary);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     position: sticky;
     left: 0;
     z-index: 9;
@@ -502,7 +502,7 @@ h3 {
     cursor: pointer;
     transition: all var(--animation-duration) var(--animation-easing);
     position: relative;
-    min-height: 90px;
+    min-height: 60px;
 }
 
 .class-cell:hover {
@@ -535,12 +535,12 @@ h3 {
 .class-name {
     font-weight: var(--heading-weight);
     color: var(--dark-neutral);
-    margin-bottom: 4px;
-    font-size: 0.9rem;
+    margin-bottom: 2px;
+    font-size: 0.8rem;
 }
 
 .teacher-name {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: var(--secondary);
     margin-bottom: 2px;
 }

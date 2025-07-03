@@ -6,11 +6,7 @@ class SkulptApp {
         this.userType = urlParams.get('user') || 'ghazal'; // Default to ghazal if no param
         
         // Data structures
-        this.timeSlots = [
-            '7:00 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', 
-            '11:00 AM', '11:15 AM', '11:30 AM', '12:00 PM', '12:15 PM', 
-            '12:30 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM'
-        ];
+        this.timeSlots = this.generateTimeSlots();
 
         this.days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -63,6 +59,26 @@ class SkulptApp {
 
         // Initialize the app
         this.init();
+    }
+
+    generateTimeSlots() {
+        const slots = [];
+        const startHour = 5; // 5:00 AM
+        const endHour = 21; // 9:00 PM
+        
+        for (let hour = startHour; hour <= endHour; hour++) {
+            for (let minutes = 0; minutes < 60; minutes += 15) {
+                if (hour === endHour && minutes > 0) break; // Stop at 9:00 PM
+                
+                const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+                const period = hour >= 12 ? 'PM' : 'AM';
+                const minutesStr = minutes.toString().padStart(2, '0');
+                
+                slots.push(`${displayHour}:${minutesStr} ${period}`);
+            }
+        }
+        
+        return slots;
     }
 
     init() {
