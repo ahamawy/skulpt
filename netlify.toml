@@ -3,10 +3,7 @@
   # No build command needed for static site
   command = "echo 'No build needed for static site'"
 
-[[redirects]]
-  from = "/"
-  to = "/schedule.html"
-  status = 200
+# No redirects needed - index.html exists
 
 [[headers]]
   for = "/*"
