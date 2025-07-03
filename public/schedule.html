@@ -299,6 +299,20 @@
     <!-- JavaScript -->
     <script src="./js/app.js"></script>
     
+    <!-- Supabase Integration (loads only if configured) -->
+    <script type="module">
+        // Check if Supabase credentials are configured
+        const hasSupabase = window.SUPABASE_URL && window.SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL';
+        
+        if (hasSupabase) {
+            import('./js/app-wrapper.js').then(module => {
+                module.enhanceApp();
+            }).catch(error => {
+                console.log('Supabase enhancement not loaded:', error);
+            });
+        }
+    </script>
+    
     <!-- PDF Export Libraries - Load at end for better reliability -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

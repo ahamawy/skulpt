@@ -1,6 +1,10 @@
 // Skulpt Studio Booking System - Main Application
 class SkulptApp {
     constructor() {
+        // Check URL parameters for user type
+        const urlParams = new URLSearchParams(window.location.search);
+        this.userType = urlParams.get('user') || 'ghazal'; // Default to ghazal if no param
+        
         // Data structures
         this.timeSlots = this.generateTimeSlots();
 
@@ -80,11 +84,37 @@ class SkulptApp {
     init() {
         // Initialize event listeners
         this.setupEventListeners();
+        // Update UI based on user type
+        this.updateUIForUserType();
         // Update UI
         this.updateTime();
         setInterval(() => this.updateTime(), 60000);
         this.renderSchedule();
         this.updateStats();
+    }
+
+    updateUIForUserType() {
+        // Update the user display in navigation
+        const userDisplay = document.getElementById('userDisplay');
+        if (userDisplay) {
+            userDisplay.textContent = this.userType === 'superadmin' ? 'Superadmin' : 'Ghazal';
+        }
+        
+        // Update welcome message
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        if (welcomeMessage) {
+            if (this.userType === 'ghazal') {
+                welcomeMessage.innerHTML = 'Hello Ghazal <span style="font-size: 0.6em; opacity: 0.7;">✨</span>';
+            } else {
+                welcomeMessage.innerHTML = 'Hello There <span style="font-size: 0.6em; opacity: 0.7;">👋</span>';
+            }
+        }
+        
+        // Show/hide settings button based on user type
+        const settingsBtn = document.querySelector('[data-view="settings"]');
+        if (settingsBtn) {
+            settingsBtn.style.display = this.userType === 'superadmin' ? 'inline-flex' : 'none';
+        }
     }
 
     loadAllData() {
@@ -309,6 +339,12 @@ class SkulptApp {
         document.querySelectorAll('.tab-group .btn')[index].classList.add('active');
         this.renderSchedule();
         this.updateStats();
+    }
+
+    switchToAllRooms() {
+        // Switch to schedule view and all rooms
+        this.switchView('schedule');
+        this.switchRoom('all');
     }
 
     switchView(view) {
@@ -762,6 +798,282 @@ class SkulptApp {
                 teacherList.appendChild(teacherItem);
             }, index * 50);
         });
+
+        // Update charts
+        this.updateCharts(teacherCounts, totalClasses);
+    }
+
+    updateCharts(teacherCounts, totalClasses) {
+        // Only show charts for Ghazal view
+        if (this.userType !== 'ghazal') return;
+
+        // Brand colors
+        const brandColors = [
+            '#D3B7A3', // Main accent
+            '#7D7A78', // Secondary
+            '#E8E2D6', // Background
+            '#4A4A4A', // Dark neutral
+            '#C4A690', // Lighter accent
+            '#968B87', // Mid tone
+            '#F0EBE5', // Light background
+            '#A89F9A'  // Another mid tone
+        ];
+
+        // 1. Teacher Load Distribution
+        const teacherCtx = document.getElementById('teacherLoadChart');
+        if (teacherCtx) {
+            const teacherChart = Chart.getChart('teacherLoadChart');
+            if (teacherChart) teacherChart.destroy();
+            
+            new Chart(teacherCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(teacherCounts),
+                    datasets: [{
+                        data: Object.values(teacherCounts),
+                        backgroundColor: brandColors,
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 11 },
+                                color: '#4A4A4A',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        return {
+                                            text: label + ' (' + value + ')',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return context.label + ': ' + value + ' classes (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Room Schedule Split
+        const roomCtx = document.getElementById('roomSplitChart');
+        if (roomCtx) {
+            const roomChart = Chart.getChart('roomSplitChart');
+            if (roomChart) roomChart.destroy();
+
+            let movementCount = 0;
+            let reformerCount = 0;
+            
+            Object.values(this.movementSchedule).forEach(day => {
+                movementCount += Object.keys(day).length;
+            });
+            
+            Object.values(this.reformerSchedule).forEach(day => {
+                reformerCount += Object.keys(day).length;
+            });
+
+            new Chart(roomCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Movement Room', 'Reformer Room'],
+                    datasets: [{
+                        data: [movementCount, reformerCount],
+                        backgroundColor: ['#D3B7A3', '#7D7A78'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 11 },
+                                color: '#4A4A4A',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(0);
+                                        return {
+                                            text: label + ' (' + value + ' - ' + percentage + '%)',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return context.label + ': ' + value + ' classes (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // 3. Class Type Distribution
+        const classTypeCtx = document.getElementById('classTypeChart');
+        if (classTypeCtx) {
+            const classTypeChart = Chart.getChart('classTypeChart');
+            if (classTypeChart) classTypeChart.destroy();
+
+            const classTypeCounts = {};
+            [this.movementSchedule, this.reformerSchedule].forEach(schedule => {
+                Object.values(schedule).forEach(day => {
+                    Object.values(day).forEach(classData => {
+                        classTypeCounts[classData.type] = (classTypeCounts[classData.type] || 0) + 1;
+                    });
+                });
+            });
+
+            new Chart(classTypeCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(classTypeCounts),
+                    datasets: [{
+                        data: Object.values(classTypeCounts),
+                        backgroundColor: ['#D3B7A3', '#C4A690'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 11 },
+                                color: '#4A4A4A',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(0);
+                                        return {
+                                            text: label + ' (' + value + ' - ' + percentage + '%)',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return context.label + ': ' + value + ' classes (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. Daily Class Volume
+        const dailyCtx = document.getElementById('dailyVolumeChart');
+        if (dailyCtx) {
+            const dailyChart = Chart.getChart('dailyVolumeChart');
+            if (dailyChart) dailyChart.destroy();
+
+            const dailyCounts = {};
+            this.days.forEach(day => {
+                let count = 0;
+                if (this.movementSchedule[day]) {
+                    count += Object.keys(this.movementSchedule[day]).length;
+                }
+                if (this.reformerSchedule[day]) {
+                    count += Object.keys(this.reformerSchedule[day]).length;
+                }
+                dailyCounts[day] = count;
+            });
+
+            new Chart(dailyCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(dailyCounts),
+                    datasets: [{
+                        label: 'Classes per Day',
+                        data: Object.values(dailyCounts),
+                        backgroundColor: '#D3B7A3',
+                        borderColor: '#D3B7A3',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                color: '#4A4A4A'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4A4A4A'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + ' classes';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 
     animateValue(id, start, end, duration) {

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skulpt - Configuration Example</title>
+</head>
+<body>
+    <!-- 
+    To enable Supabase integration, add this script tag to your index.html or schedule.html
+    before the closing </body> tag:
+    -->
+    
+    <script>
+        // Replace these with your actual Supabase credentials
+        window.SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+        window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        // Optional: Disable Supabase integration
+        // window.USE_SUPABASE = false;
+    </script>
+    
+    <!-- 
+    For production deployment on Netlify:
+    1. Go to Site configuration → Environment variables
+    2. Add these environment variables:
+       - SUPABASE_URL: your_project_url
+       - SUPABASE_ANON_KEY: your_anon_key
+    3. Update your build script to inject these values
+    -->
+</body>
+</html>
