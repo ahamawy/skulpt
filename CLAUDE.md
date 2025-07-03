@@ -3,14 +3,14 @@
 ## Project Overview
 Skulpt is a fitness studio booking management system for managing classes, teachers, and schedules across two rooms (Movement and Reformer).
 
-## Recent Upgrades Completed
-1. ✅ Git repository initialized and pushed to GitHub
-2. ✅ GitHub-Netlify integration ready for automatic deployments
-3. ✅ Extended time slots from 5:00 AM to 9:00 PM with 15-minute intervals
-4. ✅ Supabase database integration with automatic fallback to localStorage
-5. ✅ Fixed teacher and class management to sync with database
-6. ✅ Added skill level breakdown pie chart to statistics
-7. ✅ Implemented multi-slot visual highlighting for longer classes
+## Key Features
+- **Dual Room Management**: Movement Room and Reformer Room with independent schedules
+- **Time Slots**: 15-minute intervals from 5 AM to 9 PM
+- **Multi-slot Classes**: All classes default to 45 minutes (3 slots) with visual continuity
+- **Real-time Database**: Supabase integration with automatic localStorage fallback
+- **User Types**: Ghazal (admin) and Superadmin views
+- **Export Options**: PDF reports, Instagram stories, and print-friendly views
+- **Modern UI**: Shadcn-inspired components with gradients and subtle animations
 
 ## Supabase Configuration
 The project is configured to use the following Supabase instance:
@@ -129,41 +129,28 @@ skulpt/
 - Ensure the Supabase project is not paused (free tier limitation)
 - Verify Row Level Security (RLS) policies if experiencing permission issues
 
-## Session Notes (January 3, 2025)
+## Latest Updates (January 3, 2025)
 
-### Initial Setup
-- Configured Supabase credentials in `/public/js/config.js`
-- Created database tables using Supabase MCP migration tool
-- Tables include proper constraints and RLS policies for anonymous access
-- Added duration field support for multi-slot classes
-- Database is ready for data migration from localStorage
-- Project hosted in EU West 2 region
+### Major Changes
+1. **45-Minute Default Duration**
+   - All classes now default to 45 minutes (3 time slots)
+   - Automatic migration updates existing classes
+   - Multi-slot overlap detection prevents booking conflicts
 
-### Recent Updates (Latest Session)
-1. **Calendar View Improvements**:
-   - Improved visual layout for 15-minute time slots
-   - Added visual grouping every hour with stronger borders
-   - Reduced cell heights for more compact view
-   - Only show hour marks in time column (e.g., "9:00 AM")
-   - Quarter-hour slots are visually present but time labels hidden
+2. **Enhanced Calendar View**
+   - Compact 15-minute slots with visual hour groupings
+   - Only hour marks shown in time column
+   - Improved multi-slot class visualization
 
-2. **Multi-Slot Class Display**:
-   - **DEFAULT: All classes now default to 45 minutes duration**
-   - Classes properly span multiple 15-minute slots based on duration
-   - Visual continuity with rounded corners only on start/end slots
-   - Middle slots show continuation without redundant text
-   - Automatic migration adds 45-minute duration to existing classes
+3. **Settings Room Navigation**
+   - Added room tabs to filter settings by Movement/Reformer/All
+   - Improved organization of teacher and class management
 
-3. **UI/CSS Enhancements**:
-   - Shadcn-inspired button styling with subtle gradients
-   - Improved hover states and transitions
-   - More compact class information display
-   - Better visual hierarchy with adjusted font sizes
-
-4. **Pending Fixes**:
-   - Room navigation in settings view
-   - Statistics charts data accuracy with Supabase
-   - Additional shadcn-inspired components
+4. **UI Improvements**
+   - Shadcn-inspired gradients and shadows
+   - Enhanced cards with backdrop blur effects
+   - Better hover states and transitions
+   - Fixed statistics charts to respect room filters
 
 ## Key Technical Changes
 
@@ -201,10 +188,12 @@ skulpt/
    - Chrome/Edge: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
    - Clear browser cache if needed
 
-## Testing Checklist
-- [ ] Verify all classes span 3 slots (45 minutes) by default
-- [ ] Check visual continuity of multi-slot classes
-- [ ] Confirm hour marks are displayed clearly
-- [ ] Test class creation with different durations
-- [ ] Verify Supabase sync is working
-- [ ] Check statistics page data accuracy
+## Quick Start
+1. **View Live Site**: Changes automatically deploy to Netlify after GitHub push
+2. **Make Changes**: Edit files locally, then:
+   ```bash
+   git add .
+   git commit -m "Your changes"
+   git push origin main
+   ```
+3. **Hard Refresh**: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac) to see updates
