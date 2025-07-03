@@ -10,60 +10,17 @@ export const supabase = config.hasValidCredentials()
 // Database schema functions
 export async function initializeDatabase() {
     try {
-        // Create tables if they don't exist
-        await createTables()
-        console.log('Database initialized successfully')
+        // Tables are now created via migration
+        // Just verify connection by attempting a simple query
+        const { error } = await supabase.from('teachers').select('count').single()
+        if (!error || error.code === 'PGRST116') { // PGRST116 = no rows returned (which is fine)
+            console.log('Database connection verified successfully')
+        } else {
+            throw error
+        }
     } catch (error) {
-        console.error('Error initializing database:', error)
+        console.error('Error connecting to database:', error)
     }
-}
-
-async function createTables() {
-    // Teachers table
-    await supabase.rpc('create_table_if_not_exists', {
-        table_query: `
-            CREATE TABLE IF NOT EXISTS teachers (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                room VARCHAR(50) NOT NULL,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            );
-        `
-    })
-
-    // Class types table
-    await supabase.rpc('create_table_if_not_exists', {
-        table_query: `
-            CREATE TABLE IF NOT EXISTS class_types (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                room VARCHAR(50) NOT NULL,
-                level VARCHAR(50) DEFAULT 'Intermediate',
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            );
-        `
-    })
-
-    // Schedule entries table
-    await supabase.rpc('create_table_if_not_exists', {
-        table_query: `
-            CREATE TABLE IF NOT EXISTS schedule_entries (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                day VARCHAR(20) NOT NULL,
-                time VARCHAR(20) NOT NULL,
-                room VARCHAR(50) NOT NULL,
-                class_id UUID REFERENCES class_types(id),
-                teacher_id UUID REFERENCES teachers(id),
-                type VARCHAR(50) DEFAULT 'Mixed',
-                start_date DATE,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                UNIQUE(day, time, room)
-            );
-        `
-    })
 }
 
 // Teacher functions
@@ -156,9 +113,14 @@ export async function getSchedule() {
 }
 
 export async function addScheduleEntry(entry) {
+    // Ensure duration is included with default of 15
+    const entryWithDuration = {
+        ...entry,
+        duration: entry.duration || 15
+    }
     const { data, error } = await supabase
         .from('schedule_entries')
-        .insert(entry)
+        .insert(entryWithDuration)
         .select()
     if (error) throw error
     return data[0]

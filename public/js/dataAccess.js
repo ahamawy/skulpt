@@ -181,7 +181,8 @@ class DataAccess {
                         class_id: classType.id,
                         teacher_id: teacher.id,
                         type: classInfo.type || 'Mixed',
-                        start_date: classInfo.startDate || null
+                        start_date: classInfo.startDate || null,
+                        duration: classInfo.duration || 15
                     })
                 }
             } catch (error) {
@@ -238,7 +239,8 @@ class DataAccess {
                 teacher: entry.teacher.name,
                 level: entry.class.level,
                 type: entry.type,
-                startDate: entry.start_date
+                startDate: entry.start_date,
+                duration: entry.duration || 15
             }
         })
         
