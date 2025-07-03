@@ -165,20 +165,22 @@ class SkulptApp {
 
         if (savedMovement) {
             this.movementSchedule = JSON.parse(savedMovement);
+            // Migrate existing classes to have 45-minute duration
+            this.migrateScheduleDurations(this.movementSchedule);
         } else {
             // Default schedule
             this.movementSchedule = {
                 'Sunday': {
-                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed' },
-                    '6:00 PM': { class: 'Skulpt X Strength', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed' },
-                    '7:00 PM': { class: 'Yin Yoga', teacher: 'Haya', level: 'Beginner', type: 'Mixed' }
+                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed', duration: 45 },
+                    '6:00 PM': { class: 'Skulpt X Strength', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 45 },
+                    '7:00 PM': { class: 'Yin Yoga', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 45 }
                 },
                 'Monday': {
-                    '9:00 AM': { class: 'SKULPT X Mama', teacher: 'Natalie', level: 'Beginner', type: 'Ladies Only' },
-                    '10:00 AM': { class: 'Hatha Yoga - Sun', teacher: 'Haya', level: 'Intermediate', type: 'Mixed' },
-                    '11:15 AM': { class: 'Barre Skulpt', teacher: 'Ann', level: 'Intermediate', type: 'Ladies Only' },
-                    '12:15 PM': { class: 'Skulpt Ground', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed' },
-                    '6:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed' }
+                    '9:00 AM': { class: 'SKULPT X Mama', teacher: 'Natalie', level: 'Beginner', type: 'Ladies Only', duration: 45 },
+                    '10:00 AM': { class: 'Hatha Yoga - Sun', teacher: 'Haya', level: 'Intermediate', type: 'Mixed', duration: 45 },
+                    '11:15 AM': { class: 'Barre Skulpt', teacher: 'Ann', level: 'Intermediate', type: 'Ladies Only', duration: 45 },
+                    '12:15 PM': { class: 'Skulpt Ground', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 45 },
+                    '6:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 45 }
                 },
                 'Tuesday': {
                     '10:00 AM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed' },
@@ -207,6 +209,8 @@ class SkulptApp {
 
         if (savedReformer) {
             this.reformerSchedule = JSON.parse(savedReformer);
+            // Migrate existing classes to have 45-minute duration
+            this.migrateScheduleDurations(this.reformerSchedule);
         } else {
             // Default schedule
             this.reformerSchedule = {
@@ -409,44 +413,79 @@ class SkulptApp {
         });
         
         // Create time slot rows
-        this.timeSlots.forEach(time => {
+        this.timeSlots.forEach((time, index) => {
             const row = table.insertRow();
             const timeCell = row.insertCell();
-            timeCell.textContent = time;
-            timeCell.className = 'time-cell';
+            
+            // Only show time for hour marks (XX:00)
+            const isHourMark = time.includes(':00');
+            if (isHourMark) {
+                timeCell.textContent = time;
+                timeCell.className = 'time-cell hour-mark';
+            } else {
+                timeCell.textContent = '';
+                timeCell.className = 'time-cell quarter-hour';
+            }
             
             this.days.forEach(day => {
                 const cell = row.insertCell();
                 cell.className = 'class-cell';
                 cell.onclick = () => this.openModal(day, time, cell, room);
                 
-                const classData = schedule[day] && schedule[day][time];
-                if (classData && this.isClassActive(classData)) {
-                    cell.classList.add('filled');
-                    const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
-                    let dateInfo = '';
-                    if (classData.startDate && !this.isClassActive(classData)) {
-                        const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        dateInfo = `<span class="class-future">Starts ${startDate}</span>`;
+                // Check if this slot is part of a multi-slot class
+                const multiSlotInfo = this.isMultiSlotOccupied(day, time, room);
+                
+                if (multiSlotInfo.occupied) {
+                    cell.classList.add('filled', `multi-slot-${multiSlotInfo.position}`);
+                    if (multiSlotInfo.position === 'start') {
+                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
+                        cell.innerHTML = `
+                            <div class="class-name">${multiSlotInfo.classData.class}</div>
+                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${multiSlotInfo.classData.level || ''}</span>
+                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type || 'Mixed'}</span>
+                            </div>
+                        `;
+                    } else {
+                        cell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
+                        cell.onclick = null; // Disable clicking on occupied slots
                     }
-                    cell.innerHTML = `
-                        <div class="class-name">${classData.class}</div>
-                        <div class="teacher-name">${classData.teacher}</div>
-                        <div class="class-info">
-                            <span class="class-level">${classData.level || ''}</span>
-                            <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
-                            ${dateInfo}
-                        </div>
-                    `;
-                } else if (classData && !this.isClassActive(classData)) {
-                    cell.classList.add('future');
-                    const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    cell.innerHTML = `
-                        <div class="class-name future-class">${classData.class}</div>
-                        <div class="class-future">Starts ${startDate}</div>
-                    `;
                 } else {
-                    cell.innerHTML = '<span class="empty-cell">+ Add class</span>';
+                    const classData = schedule[day] && schedule[day][time];
+                    if (classData && this.isClassActive(classData)) {
+                        cell.classList.add('filled');
+                        
+                        // Check if this is a multi-slot class starting here
+                        if ((classData.duration || 45) > 15) {
+                            cell.classList.add('multi-slot-start');
+                        }
+                        
+                        const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
+                        let dateInfo = '';
+                        if (classData.startDate && !this.isClassActive(classData)) {
+                            const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            dateInfo = `<span class="class-future">Starts ${startDate}</span>`;
+                        }
+                        cell.innerHTML = `
+                            <div class="class-name">${classData.class}</div>
+                            <div class="teacher-name">${classData.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${classData.level || ''}</span>
+                                <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
+                                ${dateInfo}
+                            </div>
+                        `;
+                    } else if (classData && !this.isClassActive(classData)) {
+                        cell.classList.add('future');
+                        const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        cell.innerHTML = `
+                            <div class="class-name future-class">${classData.class}</div>
+                            <div class="class-future">Starts ${startDate}</div>
+                        `;
+                    } else {
+                        cell.innerHTML = '<span class="empty-cell">+ Add class</span>';
+                    }
                 }
             });
         });
@@ -483,11 +522,19 @@ class SkulptApp {
         });
         
         // Create time slot rows
-        this.timeSlots.forEach(time => {
+        this.timeSlots.forEach((time, index) => {
             const row = table.insertRow();
             const timeCell = row.insertCell();
-            timeCell.textContent = time;
-            timeCell.className = 'time-cell';
+            
+            // Only show time for hour marks (XX:00)
+            const isHourMark = time.includes(':00');
+            if (isHourMark) {
+                timeCell.textContent = time;
+                timeCell.className = 'time-cell hour-mark';
+            } else {
+                timeCell.textContent = '';
+                timeCell.className = 'time-cell quarter-hour';
+            }
             
             this.days.forEach(day => {
                 // Movement room cell
@@ -508,16 +555,8 @@ class SkulptApp {
                         movementCell.classList.add('filled');
                         
                         // Check if this is a multi-slot class
-                        if (movementClass.duration > 15) {
-                            const slotsNeeded = Math.ceil(movementClass.duration / 15);
+                        if ((movementClass.duration || 45) > 15) {
                             movementCell.classList.add('multi-slot-start');
-                            
-                            // Mark subsequent slots
-                            for (let i = 1; i < slotsNeeded && i + this.timeSlots.indexOf(time) < this.timeSlots.length; i++) {
-                                const nextSlotIndex = this.timeSlots.indexOf(time) + i;
-                                const position = i === slotsNeeded - 1 ? 'end' : 'middle';
-                                // We'll mark these in the next iterations
-                            }
                         }
                         
                         const typeClass = movementClass.type === 'Ladies Only' ? 'ladies' : '';
@@ -559,7 +598,7 @@ class SkulptApp {
                         reformerCell.classList.add('filled');
                         
                         // Check if this is a multi-slot class
-                        if (reformerClass.duration > 15) {
+                        if ((reformerClass.duration || 45) > 15) {
                             reformerCell.classList.add('multi-slot-start');
                         }
                         
@@ -682,8 +721,8 @@ class SkulptApp {
             pill.onclick = () => this.selectDuration(parseInt(pill.dataset.duration));
         });
         
-        // Set default duration
-        this.selectedDuration = existingClass?.duration || 15;
+        // Set default duration to 45 minutes
+        this.selectedDuration = existingClass?.duration || 45;
         document.querySelectorAll('.duration-pill').forEach(pill => {
             pill.classList.toggle('active', parseInt(pill.dataset.duration) === this.selectedDuration);
         });
@@ -744,7 +783,7 @@ class SkulptApp {
                 teacher: teacherValue,
                 level: this.selectedLevel,
                 type: this.selectedType,
-                duration: this.selectedDuration || 15
+                duration: this.selectedDuration || 45
             };
             
             // Add start date if specified
@@ -753,7 +792,7 @@ class SkulptApp {
             }
             
             // Check if class duration would overlap with existing classes
-            if (this.selectedDuration > 15) {
+            if (classData.duration > 15) {
                 const overlappingSlots = this.getOverlappingSlots(
                     this.currentCell.day,
                     this.currentCell.time,
@@ -1281,7 +1320,7 @@ class SkulptApp {
     getClassDuration(day, time, room) {
         const schedule = room === 'movement' ? this.movementSchedule : this.reformerSchedule;
         const classData = schedule[day] && schedule[day][time];
-        return classData ? (classData.duration || 15) : 0;
+        return classData ? (classData.duration || 45) : 0;
     }
 
     isMultiSlotOccupied(day, time, room) {
@@ -1293,8 +1332,8 @@ class SkulptApp {
             const prevTime = this.timeSlots[i];
             const prevClass = schedule[day] && schedule[day][prevTime];
             
-            if (prevClass && prevClass.duration > 15) {
-                const slotsNeeded = Math.ceil(prevClass.duration / 15);
+            if (prevClass && (prevClass.duration || 45) > 15) {
+                const slotsNeeded = Math.ceil((prevClass.duration || 45) / 15);
                 const endIndex = i + slotsNeeded - 1;
                 
                 if (timeIndex <= endIndex) {
@@ -2131,6 +2170,22 @@ class SkulptApp {
         }
         
         this.showNotification('Settings saved successfully', 'success');
+    }
+    
+    migrateScheduleDurations(schedule) {
+        let migrated = false;
+        Object.keys(schedule).forEach(day => {
+            Object.keys(schedule[day]).forEach(time => {
+                if (!schedule[day][time].duration) {
+                    schedule[day][time].duration = 45;
+                    migrated = true;
+                }
+            });
+        });
+        if (migrated) {
+            // Save the migrated data
+            this.saveScheduleData();
+        }
     }
 }
 

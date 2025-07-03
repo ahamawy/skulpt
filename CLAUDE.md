@@ -62,16 +62,53 @@ The following tables are required (will be created automatically on first run):
 - **Automatic Migration**: Existing localStorage data migrates to Supabase automatically
 - **Offline Support**: Falls back to localStorage if Supabase is unavailable
 
-## Development Commands
-```bash
-# Start development server
-npm start
+## Development & Deployment
 
-# The app runs on http://localhost:8080
+### Local Development
+```bash
+# Clone the repository
+git clone https://github.com/ahamawy/skulpt.git
+cd skulpt
+
+# Open in browser directly (no build process needed)
+# Option 1: Open index.html directly in browser
+# Option 2: Use a simple HTTP server
+python3 -m http.server 8000
+# or
+npx http-server -p 8000
+
+# Access at http://localhost:8000/public/schedule.html
 ```
 
-## Deployment
-The project is configured for Netlify deployment with automatic builds from GitHub main branch.
+### Deployment via Git & Netlify
+1. **Push changes to GitHub**:
+   ```bash
+   git add .
+   git commit -m "Update description"
+   git push origin main
+   ```
+
+2. **Automatic Deployment**:
+   - Netlify automatically deploys when changes are pushed to GitHub main branch
+   - No build process required - it's a static site
+   - Site will be live at your Netlify URL within minutes
+
+### Project Structure
+```
+skulpt/
+├── public/
+│   ├── schedule.html      # Main application
+│   ├── migrate.html       # Manual migration tool
+│   ├── css/
+│   │   └── styles.css     # All styling (shadcn-inspired)
+│   └── js/
+│       ├── app.js         # Core application logic
+│       ├── config.js      # Supabase configuration
+│       ├── supabase.js    # Database operations
+│       ├── dataAccess.js  # Data abstraction layer
+│       ├── migration.js   # Data migration logic
+│       └── app-wrapper.js # Supabase enhancement layer
+└── CLAUDE.md             # This documentation
 
 ## Important Files
 - `/public/js/config.js` - Supabase configuration
@@ -93,6 +130,8 @@ The project is configured for Netlify deployment with automatic builds from GitH
 - Verify Row Level Security (RLS) policies if experiencing permission issues
 
 ## Session Notes (January 3, 2025)
+
+### Initial Setup
 - Configured Supabase credentials in `/public/js/config.js`
 - Created database tables using Supabase MCP migration tool
 - Tables include proper constraints and RLS policies for anonymous access
@@ -100,8 +139,72 @@ The project is configured for Netlify deployment with automatic builds from GitH
 - Database is ready for data migration from localStorage
 - Project hosted in EU West 2 region
 
-## Next Steps
-1. Open the application in browser to trigger automatic migration
-2. Verify data has migrated by checking Supabase dashboard
-3. Test real-time sync by opening app in multiple browser tabs
-4. Configure Netlify environment variables for production deployment
+### Recent Updates (Latest Session)
+1. **Calendar View Improvements**:
+   - Improved visual layout for 15-minute time slots
+   - Added visual grouping every hour with stronger borders
+   - Reduced cell heights for more compact view
+   - Only show hour marks in time column (e.g., "9:00 AM")
+   - Quarter-hour slots are visually present but time labels hidden
+
+2. **Multi-Slot Class Display**:
+   - **DEFAULT: All classes now default to 45 minutes duration**
+   - Classes properly span multiple 15-minute slots based on duration
+   - Visual continuity with rounded corners only on start/end slots
+   - Middle slots show continuation without redundant text
+   - Automatic migration adds 45-minute duration to existing classes
+
+3. **UI/CSS Enhancements**:
+   - Shadcn-inspired button styling with subtle gradients
+   - Improved hover states and transitions
+   - More compact class information display
+   - Better visual hierarchy with adjusted font sizes
+
+4. **Pending Fixes**:
+   - Room navigation in settings view
+   - Statistics charts data accuracy with Supabase
+   - Additional shadcn-inspired components
+
+## Key Technical Changes
+
+### Class Duration System
+- All classes now default to 45 minutes (3 slots)
+- Duration options: 15, 30, 45, 60, 75, 90 minutes
+- Automatic migration for existing classes without duration
+- Multi-slot overlap detection prevents booking conflicts
+
+### Visual Calendar Updates
+```css
+/* 15-minute slots are visually grouped by hour */
+.schedule-table tr:nth-child(4n+2) td {
+    border-top: 2px solid rgba(0,0,0,0.08);
+}
+
+/* Compact cell sizing */
+.class-cell {
+    min-height: 25px;  /* Reduced from 35px */
+    padding: 2px 4px;
+}
+```
+
+## Deployment Instructions
+1. **Commit and push all changes**:
+   ```bash
+   git add .
+   git commit -m "Add 45-min default duration, improve calendar view"
+   git push origin main
+   ```
+
+2. **Netlify will automatically deploy** from GitHub main branch
+
+3. **To view changes immediately**, hard refresh browser:
+   - Chrome/Edge: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+   - Clear browser cache if needed
+
+## Testing Checklist
+- [ ] Verify all classes span 3 slots (45 minutes) by default
+- [ ] Check visual continuity of multi-slot classes
+- [ ] Confirm hour marks are displayed clearly
+- [ ] Test class creation with different durations
+- [ ] Verify Supabase sync is working
+- [ ] Check statistics page data accuracy
