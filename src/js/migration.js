@@ -4,6 +4,11 @@ import { supabase, addTeacher, addClass, addScheduleEntry } from './supabase.js'
 export async function migrateDataToSupabase() {
     console.log('Starting migration from localStorage to Supabase...')
     
+    // Log what data we have in localStorage
+    console.log('localStorage keys:', Object.keys(localStorage))
+    console.log('movementSchedule:', localStorage.getItem('movementSchedule') ? 'exists' : 'not found')
+    console.log('reformerSchedule:', localStorage.getItem('reformerSchedule') ? 'exists' : 'not found')
+    
     try {
         // Migrate teachers
         await migrateTeachers()
@@ -158,13 +163,24 @@ async function migrateSchedule() {
 export function needsMigration() {
     // Check if we have data in localStorage but haven't migrated yet
     const hasMigrated = localStorage.getItem('supabase_migration_complete')
+    console.log('Migration status:', hasMigrated ? 'already migrated' : 'not migrated')
+    
     if (hasMigrated) return false
     
     // Check if there's data to migrate
     const hasMovementSchedule = localStorage.getItem('movementSchedule')
     const hasReformerSchedule = localStorage.getItem('reformerSchedule')
+    const hasMovementTeachers = localStorage.getItem('movementTeachers')
+    const hasReformerTeachers = localStorage.getItem('reformerTeachers')
     
-    return !!(hasMovementSchedule || hasReformerSchedule)
+    console.log('Data check:', {
+        movementSchedule: !!hasMovementSchedule,
+        reformerSchedule: !!hasReformerSchedule,
+        movementTeachers: !!hasMovementTeachers,
+        reformerTeachers: !!hasReformerTeachers
+    })
+    
+    return !!(hasMovementSchedule || hasReformerSchedule || hasMovementTeachers || hasReformerTeachers)
 }
 
 // Mark migration as complete

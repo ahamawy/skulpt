@@ -22,9 +22,18 @@ function enhanceApp() {
 
     // Override init to add migration check
     SkulptApp.prototype.init = async function() {
+        console.log('Enhanced init running...');
+        console.log('Supabase configured:', config.hasValidCredentials());
+        
+        // Initialize database connection
+        if (config.hasValidCredentials()) {
+            const { initializeDatabase } = await import('./supabase.js');
+            await initializeDatabase();
+        }
+        
         // Check if we need to migrate data
         if (needsMigration() && config.hasValidCredentials()) {
-            console.log('Migrating data to Supabase...');
+            console.log('Migration needed, starting migration to Supabase...');
             const migrationSuccess = await migrateDataToSupabase();
             if (migrationSuccess) {
                 markMigrationComplete();
@@ -279,3 +288,6 @@ function enhanceApp() {
 
 // Export the enhance function
 export { enhanceApp };
+
+// Also add debugging
+console.log('app-wrapper.js loaded');

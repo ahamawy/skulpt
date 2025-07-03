@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skulpt - Manual Migration</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header card">
+            <h1>Skulpt Data Migration</h1>
+            <p>Use this page to manually migrate your data from localStorage to Supabase</p>
+        </div>
+        
+        <div class="card">
+            <h3>Migration Status</h3>
+            <div id="status"></div>
+            <button class="btn btn-primary" onclick="runMigration()">Run Migration</button>
+            <button class="btn btn-secondary" onclick="checkData()">Check Data</button>
+            <button class="btn btn-danger" onclick="resetMigration()">Reset Migration Status</button>
+        </div>
+        
+        <div class="card">
+            <h3>Console Output</h3>
+            <pre id="console" style="background: #f5f5f5; padding: 20px; border-radius: 8px; max-height: 400px; overflow-y: auto;"></pre>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { config } from './js/config.js';
+        import { needsMigration, migrateDataToSupabase, markMigrationComplete } from './js/migration.js';
+        import { supabase } from './js/supabase.js';
+        
+        const consoleEl = document.getElementById('console');
+        const statusEl = document.getElementById('status');
+        
+        function log(message) {
+            console.log(message);
+            consoleEl.textContent += message + '\n';
+        }
+        
+        window.checkData = function() {
+            log('=== Checking localStorage data ===');
+            log('All keys: ' + Object.keys(localStorage).join(', '));
+            
+            const movementSchedule = localStorage.getItem('movementSchedule');
+            const reformerSchedule = localStorage.getItem('reformerSchedule');
+            const movementTeachers = localStorage.getItem('movementTeachers');
+            const reformerTeachers = localStorage.getItem('reformerTeachers');
+            
+            if (movementSchedule) {
+                log('\nMovement Schedule:');
+                log(JSON.stringify(JSON.parse(movementSchedule), null, 2));
+            }
+            
+            if (reformerSchedule) {
+                log('\nReformer Schedule:');
+                log(JSON.stringify(JSON.parse(reformerSchedule), null, 2));
+            }
+            
+            if (movementTeachers) {
+                log('\nMovement Teachers: ' + movementTeachers);
+            }
+            
+            if (reformerTeachers) {
+                log('\nReformer Teachers: ' + reformerTeachers);
+            }
+            
+            log('\n=== Checking Supabase ===');
+            log('Has valid credentials: ' + config.hasValidCredentials());
+            log('Needs migration: ' + needsMigration());
+        }
+        
+        window.runMigration = async function() {
+            log('\n=== Starting Manual Migration ===');
+            
+            try {
+                const success = await migrateDataToSupabase();
+                if (success) {
+                    markMigrationComplete();
+                    log('Migration completed successfully!');
+                    statusEl.innerHTML = '<span style="color: green;">✓ Migration Complete</span>';
+                } else {
+                    log('Migration failed!');
+                    statusEl.innerHTML = '<span style="color: red;">✗ Migration Failed</span>';
+                }
+            } catch (error) {
+                log('Migration error: ' + error.message);
+                statusEl.innerHTML = '<span style="color: red;">✗ Error: ' + error.message + '</span>';
+            }
+        }
+        
+        window.resetMigration = function() {
+            localStorage.removeItem('supabase_migration_complete');
+            log('Migration status reset. You can now run migration again.');
+            statusEl.innerHTML = '<span style="color: orange;">Migration status reset</span>';
+        }
+        
+        // Check initial status
+        checkData();
+    </script>
+</body>
+</html>
