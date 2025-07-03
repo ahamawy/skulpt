@@ -1202,8 +1202,20 @@ class SkulptApp {
                 'Teens': 0
             };
 
-            // Count skill levels from both schedules
-            [this.movementSchedule, this.reformerSchedule].forEach(schedule => {
+            // Count skill levels based on current room filter
+            if (this.currentRoom === 'all') {
+                [this.movementSchedule, this.reformerSchedule].forEach(schedule => {
+                    Object.values(schedule).forEach(day => {
+                        Object.values(day).forEach(classData => {
+                            const level = classData.level || 'Intermediate';
+                            if (skillCounts.hasOwnProperty(level)) {
+                                skillCounts[level]++;
+                            }
+                        });
+                    });
+                });
+            } else {
+                const schedule = this.currentRoom === 'movement' ? this.movementSchedule : this.reformerSchedule;
                 Object.values(schedule).forEach(day => {
                     Object.values(day).forEach(classData => {
                         const level = classData.level || 'Intermediate';
@@ -1212,7 +1224,7 @@ class SkulptApp {
                         }
                     });
                 });
-            });
+            }
 
             // Filter out levels with 0 count
             const filteredLabels = [];
@@ -1896,18 +1908,54 @@ class SkulptApp {
 
     // Settings Methods
     renderSettings() {
-        // Render teachers
-        this.renderTeachersList('movement');
-        this.renderTeachersList('reformer');
-        
-        // Render classes
-        this.renderClassesList('movement');
-        this.renderClassesList('reformer');
+        // Initialize with all rooms visible
+        this.currentSettingsRoom = 'all';
+        this.updateSettingsDisplay();
         
         // Set schedule date
         const scheduleDate = localStorage.getItem('scheduleStartDate');
         if (scheduleDate) {
             document.getElementById('scheduleStartDate').value = scheduleDate;
+        }
+    }
+    
+    switchSettingsRoom(room) {
+        this.currentSettingsRoom = room;
+        
+        // Update tab buttons
+        document.querySelectorAll('.settings-room-tabs .btn').forEach((btn, index) => {
+            const rooms = ['movement', 'reformer', 'all'];
+            btn.classList.toggle('active', rooms[index] === room);
+        });
+        
+        this.updateSettingsDisplay();
+    }
+    
+    updateSettingsDisplay() {
+        const room = this.currentSettingsRoom || 'all';
+        
+        // Show/hide sections based on room
+        const movementSections = document.querySelectorAll('.setting-item:has(#movementTeachersList), .setting-item:has(#movementClassesList)');
+        const reformerSections = document.querySelectorAll('.setting-item:has(#reformerTeachersList), .setting-item:has(#reformerClassesList)');
+        
+        if (room === 'movement') {
+            movementSections.forEach(el => el.style.display = 'block');
+            reformerSections.forEach(el => el.style.display = 'none');
+            this.renderTeachersList('movement');
+            this.renderClassesList('movement');
+        } else if (room === 'reformer') {
+            movementSections.forEach(el => el.style.display = 'none');
+            reformerSections.forEach(el => el.style.display = 'block');
+            this.renderTeachersList('reformer');
+            this.renderClassesList('reformer');
+        } else {
+            // Show all
+            movementSections.forEach(el => el.style.display = 'block');
+            reformerSections.forEach(el => el.style.display = 'block');
+            this.renderTeachersList('movement');
+            this.renderTeachersList('reformer');
+            this.renderClassesList('movement');
+            this.renderClassesList('reformer');
         }
     }
 

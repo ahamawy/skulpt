@@ -152,8 +152,15 @@
     <!-- Settings View -->
     <div id="settingsView" style="display: none;" class="fade-in">
         <div class="settings-container">
+            <!-- Room Navigation for Settings -->
+            <div class="settings-room-tabs">
+                <button class="btn btn-outline active" onclick="window.skulptApp.switchSettingsRoom('movement')">Movement Room</button>
+                <button class="btn btn-outline" onclick="window.skulptApp.switchSettingsRoom('reformer')">Reformer Room</button>
+                <button class="btn btn-outline" onclick="window.skulptApp.switchSettingsRoom('all')">All Settings</button>
+            </div>
+            
             <!-- Teacher Management -->
-            <div class="settings-section card">
+            <div class="settings-section card" id="teacherManagementSection">
                 <h3>Teacher Management</h3>
                 <div class="settings-grid">
                     <div class="setting-item">

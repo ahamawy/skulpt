@@ -1286,6 +1286,13 @@ h3 {
     margin: 0 auto;
 }
 
+.settings-room-tabs {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+    margin-bottom: calc(var(--spacing-unit) * 4);
+    justify-content: center;
+}
+
 .settings-section {
     margin-bottom: calc(var(--spacing-unit) * 4);
 }
