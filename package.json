@@ -1,0 +1,23 @@
+{
+  "name": "skulpt-booking-system",
+  "version": "1.0.0",
+  "description": "Skulpt Studio Booking Management System",
+  "main": "public/index.html",
+  "scripts": {
+    "start": "npx http-server public -p 8080 -o",
+    "build": "echo 'No build step required'",
+    "deploy": "netlify deploy --prod"
+  },
+  "keywords": [
+    "booking",
+    "schedule",
+    "pilates",
+    "yoga",
+    "skulpt"
+  ],
+  "author": "Skulpt Studio",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

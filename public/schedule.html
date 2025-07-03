@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skulpt Studio Schedule - Booking Management System</title>
+    <meta name="description" content="Manage your Skulpt Studio class schedule with ease. Book, edit, and export your pilates and yoga classes.">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="./css/styles.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23D3B7A3'/><text x='50' y='65' text-anchor='middle' font-family='Arial, sans-serif' font-size='40' font-weight='bold' fill='white'>SK</text></svg>">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-bar">
+        <div class="nav-content">
+            <a href="#" class="logo-link" onclick="window.skulptApp && window.skulptApp.switchToAllRooms(); return false;">
+                <img src="https://images.squarespace-cdn.com/content/v1/6752bf3e27744636af156116/455ee1ae-8e59-4cbe-925c-db846d81c003/skulpt+logo.jpg?format=1500w" alt="Skulpt Studio" class="nav-logo">
+            </a>
+            <div class="nav-actions">
+                <div class="nav-time" id="currentTime"></div>
+                <div id="userDisplay" style="color: var(--secondary); font-weight: var(--heading-weight); text-transform: uppercase; font-size: 0.875rem; letter-spacing: 1px;"></div>
+                <div style="position: relative;">
+                    <button class="btn btn-export">Export / Share</button>
+                    <div class="export-menu" id="exportMenu">
+                        <div class="export-option" id="exportPDF">
+                            <div class="export-option-title">Full PDF Report</div>
+                            <div class="export-option-desc">Complete 4-page schedule</div>
+                        </div>
+                        <div class="export-option" id="exportWeekly">
+                            <div class="export-option-title">Weekly Instagram Story</div>
+                            <div class="export-option-desc">This week's overview</div>
+                        </div>
+                        <div class="export-option" id="exportDaily">
+                            <div class="export-option-title">Daily Instagram Stories</div>
+                            <div class="export-option-desc">7 stories for each day</div>
+                        </div>
+                        <div class="export-option" id="exportPrint">
+                            <div class="export-option-title">Print Schedule</div>
+                            <div class="export-option-desc">Use browser print</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header card fade-in">
+            <h1 id="welcomeMessage">Class Schedule</h1>
+            <p class="subtitle">
+                <span>Move Deeply</span>
+                <span>Breathe Deeply</span>
+                <span>Align Fully</span>
+            </p>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls slide-up">
+            <div class="tab-group">
+                <button class="btn btn-outline active">Movement Room</button>
+                <button class="btn btn-outline">Reformer Room</button>
+                <button class="btn btn-outline">All Rooms</button>
+            </div>
+            <div class="view-group">
+                <button class="btn btn-text active">Schedule</button>
+                <button class="btn btn-text">Statistics</button>
+                <button class="btn btn-text">Settings</button>
+            </div>
+        </div>
+
+        <!-- Schedule View -->
+        <div id="scheduleView" class="fade-in">
+            <div class="schedule-container">
+                <div class="schedule-wrapper">
+                    <table class="schedule-table" id="scheduleTable">
+                        <!-- Table will be populated by JavaScript -->
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics View -->
+        <div id="statsView" style="display: none;" class="fade-in">
+            <div class="stats-grid">
+                <div class="stat-card card">
+                    <div class="stat-title">Weekly Classes</div>
+                    <div class="stat-value" id="totalClasses">0</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-title">Active Teachers</div>
+                    <div class="stat-value" id="activeTeachers">0</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-title">Class Varieties</div>
+                    <div class="stat-value" id="classTypes">0</div>
+                </div>
+            </div>
+
+            <div class="teacher-stats card">
+                <h3>Teacher Schedule</h3>
+                <div class="teacher-grid" id="teacherList">
+                    <!-- Teacher stats will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <div class="analytics-section">
+                <h2 class="analytics-title">Analytics Dashboard</h2>
+                <div class="charts-grid">
+                    <div class="chart-container card">
+                        <h3>Teacher Load Distribution</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="teacherLoadChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container card">
+                        <h3>Room Schedule Split</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="roomSplitChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container card">
+                        <h3>Class Type Distribution</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="classTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container card">
+                        <h3>Daily Class Volume</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="dailyVolumeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settingsView" style="display: none;" class="fade-in">
+        <div class="settings-container">
+            <!-- Teacher Management -->
+            <div class="settings-section card">
+                <h3>Teacher Management</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <h4>Movement Room Teachers</h4>
+                        <div class="teacher-list" id="movementTeachersList"></div>
+                        <button class="btn btn-primary" onclick="window.skulptApp.addTeacher('movement')">Add Teacher</button>
+                    </div>
+                    <div class="setting-item">
+                        <h4>Reformer Room Teachers</h4>
+                        <div class="teacher-list" id="reformerTeachersList"></div>
+                        <button class="btn btn-primary" onclick="window.skulptApp.addTeacher('reformer')">Add Teacher</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Type Management -->
+            <div class="settings-section card">
+                <h3>Class Type Management</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <h4>Movement Classes</h4>
+                        <div class="class-list" id="movementClassesList"></div>
+                        <button class="btn btn-primary" onclick="window.skulptApp.addClass('movement')">Add Class Type</button>
+                    </div>
+                    <div class="setting-item">
+                        <h4>Reformer Classes</h4>
+                        <div class="class-list" id="reformerClassesList"></div>
+                        <button class="btn btn-primary" onclick="window.skulptApp.addClass('reformer')">Add Class Type</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Settings -->
+            <div class="settings-section card">
+                <h3>Schedule Settings</h3>
+                <div class="setting-item">
+                    <label for="scheduleStartDate">Default Schedule Start Date</label>
+                    <input type="date" id="scheduleStartDate" class="form-input">
+                    <p class="setting-description">Set a default start date for new classes</p>
+                </div>
+                <button class="btn btn-primary" onclick="window.skulptApp.saveScheduleSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Schedule Class</h3>
+                <button class="btn btn-icon btn-close" onclick="window.skulptApp.closeModal()">✕</button>
+            </div>
+            
+            <div class="form-section">
+                <div class="form-group">
+                    <label>Select Class Type</label>
+                    <div class="class-grid" id="classGrid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="teacherSelect">Instructor</label>
+                    <select id="teacherSelect">
+                        <option value="">-- Select Instructor --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="classStartDate">Start Date (Optional)</label>
+                    <input type="date" id="classStartDate" class="form-input">
+                    <p class="form-helper">Leave empty to start immediately</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Class Level</label>
+                    <div class="level-pills" id="levelPills">
+                        <div class="level-pill" data-level="Beginner">Beginner</div>
+                        <div class="level-pill" data-level="Intermediate">Intermediate</div>
+                        <div class="level-pill" data-level="Advanced">Advanced</div>
+                        <div class="level-pill" data-level="Teens">Teens</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Class Type</label>
+                    <div class="toggle-group">
+                        <div class="toggle-option active" data-type="Mixed">Mixed</div>
+                        <div class="toggle-option" data-type="Ladies Only">Ladies Only</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="cancelModal">Cancel</button>
+                <button class="btn btn-danger" id="removeClass" style="display: none;">Remove Class</button>
+                <button class="btn btn-primary" id="saveClass">Save Class</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Deletion Modal -->
+    <div class="modal" id="teacherDeleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Teacher</h3>
+                <button class="btn btn-icon btn-close" onclick="window.skulptApp.closeTeacherDeleteModal()">✕</button>
+            </div>
+            
+            <p id="deleteTeacherMessage"></p>
+            
+            <div class="form-section">
+                <div class="form-group">
+                    <label>What would you like to do with their classes?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="deleteOption" value="replace" checked>
+                            <span>Replace with another teacher</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="deleteOption" value="delete">
+                            <span>Delete all their classes</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="replacementTeacherGroup">
+                    <label for="replacementTeacher">Select replacement teacher</label>
+                    <select id="replacementTeacher">
+                        <option value="">-- Select Teacher --</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="window.skulptApp.closeTeacherDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="window.skulptApp.confirmDeleteTeacher()">Delete Teacher</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading" id="loadingIndicator">
+        <span id="loadingText">Generating...</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="./js/app.js"></script>
+    
+    <!-- PDF Export Libraries - Load at end for better reliability -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // Wait for libraries to load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+                    console.log('PDF libraries not loaded, retrying...');
+                    // Try loading again
+                    const script1 = document.createElement('script');
+                    script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                    document.body.appendChild(script1);
+                    
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                    document.body.appendChild(script2);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

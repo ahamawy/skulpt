@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skulpt Studio - Choose Access</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="skulpt-landing">
+    <!-- Skulpt Studio · Hero Banner -->
+    <section class="skulpt-banner">
+        <div class="skulpt-inner">
+            <!-- Logo -->
+            <img src="https://images.squarespace-cdn.com/content/v1/6752bf3e27744636af156116/455ee1ae-8e59-4cbe-925c-db846d81c003/skulpt+logo.jpg?format=1500w"
+                 alt="Skulpt Studio logo"
+                 class="skulpt-logo" />
+
+            <!-- Headline -->
+            <h1 class="skulpt-headline">
+                <span>BREATHE DEEPLY</span>
+                <span>MOVE FREELY</span>
+                <span>ALIGN FULLY</span>
+            </h1>
+
+            <!-- Access Options -->
+            <div class="skulpt-access-options">
+                <h2 class="skulpt-subtitle">Choose Your Access Level</h2>
+                
+                <div class="skulpt-btn-group">
+                    <a href="#" onclick="showPasswordModal(); return false;" class="skulpt-btn skulpt-btn-primary">
+                        <span class="btn-title">Ghazal</span>
+                        <span class="btn-subtitle">Admin Access</span>
+                    </a>
+                    
+                    <a href="schedule.html?user=superadmin" class="skulpt-btn skulpt-btn-secondary">
+                        <span class="btn-title">Superadmin</span>
+                        <span class="btn-subtitle">Full System Access</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hero image -->
+            <img src="https://images.squarespace-cdn.com/content/v1/6752bf3e27744636af156116/d1b24f0e-a65d-4994-863b-dc87fb0c1b20/DSC03932-removebg.png?format=2500w"
+                 alt="Pilates pose"
+                 class="skulpt-hero-img" />
+        </div>
+    </section>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Enter Password</h3>
+                <button class="btn btn-icon btn-close" onclick="closePasswordModal()">×</button>
+            </div>
+            <div class="form-group">
+                <input type="password" id="passwordInput" class="form-input" placeholder="Enter password" onkeypress="if(event.key==='Enter') checkPassword()">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="checkPassword()">Access</button>
+                <button class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+            </div>
+            <div id="passwordError" style="color: var(--danger); text-align: center; margin-top: 16px; display: none;">Incorrect password</div>
+        </div>
+    </div>
+
+    <script>
+        function showPasswordModal() {
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('passwordInput').focus();
+            document.getElementById('passwordError').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === 'ahmedislovely') {
+                window.location.href = 'schedule.html?user=ghazal';
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
