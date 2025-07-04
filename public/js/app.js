@@ -1352,7 +1352,7 @@ class SkulptApp {
         
         if (startIndex === -1) return overlappingSlots;
         
-        const slotsNeeded = Math.ceil(duration / 15);
+        const slotsNeeded = Math.ceil(duration / 30);
         
         // Get the slots that would be occupied (excluding the first one)
         for (let i = 1; i < slotsNeeded && startIndex + i < this.timeSlots.length; i++) {
@@ -1373,7 +1373,8 @@ class SkulptApp {
         const timeIndex = this.timeSlots.indexOf(time);
         
         // Check if this slot is occupied by a multi-slot class from a previous time
-        for (let i = Math.max(0, timeIndex - 5); i < timeIndex; i++) {
+        // For 30-min slots, only need to check 1 slot back for 60-min classes
+        for (let i = Math.max(0, timeIndex - 1); i < timeIndex; i++) {
             const prevTime = this.timeSlots[i];
             const prevClass = schedule[day] && schedule[day][prevTime];
             
