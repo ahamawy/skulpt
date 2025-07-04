@@ -67,7 +67,7 @@ class SkulptApp {
         const endHour = 21; // 9:00 PM
         
         for (let hour = startHour; hour <= endHour; hour++) {
-            for (let minutes = 0; minutes < 60; minutes += 15) {
+            for (let minutes = 0; minutes < 60; minutes += 30) {
                 if (hour === endHour && minutes > 0) break; // Stop at 9:00 PM
                 
                 const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
@@ -165,44 +165,44 @@ class SkulptApp {
 
         if (savedMovement) {
             this.movementSchedule = JSON.parse(savedMovement);
-            // Migrate existing classes to have 45-minute duration
+            // Migrate existing classes to have 60-minute duration
             this.migrateScheduleDurations(this.movementSchedule);
         } else {
             // Default schedule
             this.movementSchedule = {
                 'Sunday': {
-                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed', duration: 45 },
-                    '6:00 PM': { class: 'Skulpt X Strength', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 45 },
-                    '7:00 PM': { class: 'Yin Yoga', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 45 }
+                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed', duration: 60 },
+                    '6:00 PM': { class: 'Skulpt X Strength', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 60 },
+                    '7:00 PM': { class: 'Yin Yoga', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 60 }
                 },
                 'Monday': {
-                    '9:00 AM': { class: 'SKULPT X Mama', teacher: 'Natalie', level: 'Beginner', type: 'Ladies Only', duration: 45 },
-                    '10:00 AM': { class: 'Hatha Yoga - Sun', teacher: 'Haya', level: 'Intermediate', type: 'Mixed', duration: 45 },
-                    '11:15 AM': { class: 'Barre Skulpt', teacher: 'Ann', level: 'Intermediate', type: 'Ladies Only', duration: 45 },
-                    '12:15 PM': { class: 'Skulpt Ground', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 45 },
-                    '6:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 45 }
+                    '9:00 AM': { class: 'SKULPT X Mama', teacher: 'Natalie', level: 'Beginner', type: 'Ladies Only', duration: 60 },
+                    '10:00 AM': { class: 'Hatha Yoga - Sun', teacher: 'Haya', level: 'Intermediate', type: 'Mixed', duration: 60 },
+                    '11:00 AM': { class: 'Barre Skulpt', teacher: 'Ann', level: 'Intermediate', type: 'Ladies Only', duration: 60 },
+                    '12:00 PM': { class: 'Skulpt Ground', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 60 },
+                    '6:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 60 }
                 },
                 'Tuesday': {
-                    '10:00 AM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed' },
-                    '6:00 PM': { class: 'Skulpt Ground', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed' },
-                    '7:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed' }
+                    '10:00 AM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 60 },
+                    '6:00 PM': { class: 'Skulpt Ground', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 60 },
+                    '7:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 60 }
                 },
                 'Wednesday': {
-                    '9:00 AM': { class: 'SKULPT X Mama', teacher: 'Natalie', level: 'Beginner', type: 'Ladies Only' },
-                    '10:00 AM': { class: 'Hatha Yoga - Sun', teacher: 'Haya', level: 'Intermediate', type: 'Mixed' },
-                    '11:15 AM': { class: 'Barre Skulpt', teacher: 'Ann', level: 'Intermediate', type: 'Ladies Only' },
-                    '12:15 PM': { class: 'Teens X Skulpt Ground', teacher: 'Zeena', level: 'Teens', type: 'Mixed' },
-                    '6:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed' }
+                    '9:00 AM': { class: 'SKULPT X Mama', teacher: 'Natalie', level: 'Beginner', type: 'Ladies Only', duration: 60 },
+                    '10:00 AM': { class: 'Hatha Yoga - Sun', teacher: 'Haya', level: 'Intermediate', type: 'Mixed', duration: 60 },
+                    '11:00 AM': { class: 'Barre Skulpt', teacher: 'Ann', level: 'Intermediate', type: 'Ladies Only', duration: 60 },
+                    '12:00 PM': { class: 'Teens X Skulpt Ground', teacher: 'Zeena', level: 'Teens', type: 'Mixed', duration: 60 },
+                    '6:00 PM': { class: 'Hatha Yoga - Moon', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 60 }
                 },
                 'Thursday': {
-                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed' },
-                    '11:00 AM': { class: 'Skulpt X Strength', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed' }
+                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed', duration: 60 },
+                    '11:00 AM': { class: 'Skulpt X Strength', teacher: 'Zeena', level: 'Intermediate', type: 'Mixed', duration: 60 }
                 },
                 'Friday': {
-                    '6:00 PM': { class: 'Yin Yoga', teacher: 'Haya', level: 'Beginner', type: 'Mixed' }
+                    '6:00 PM': { class: 'Yin Yoga', teacher: 'Haya', level: 'Beginner', type: 'Mixed', duration: 60 }
                 },
                 'Saturday': {
-                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed' }
+                    '10:00 AM': { class: 'Mobility: Strength X Flexibility', teacher: 'Vicktoria', level: 'Beginner', type: 'Mixed', duration: 60 }
                 }
             };
         }
@@ -417,15 +417,9 @@ class SkulptApp {
             const row = table.insertRow();
             const timeCell = row.insertCell();
             
-            // Only show time for hour marks (XX:00)
-            const isHourMark = time.includes(':00');
-            if (isHourMark) {
-                timeCell.textContent = time;
-                timeCell.className = 'time-cell hour-mark';
-            } else {
-                timeCell.textContent = '';
-                timeCell.className = 'time-cell quarter-hour';
-            }
+            // Show all times since we're using 30-minute intervals
+            timeCell.textContent = time;
+            timeCell.className = 'time-cell';
             
             this.days.forEach(day => {
                 const cell = row.insertCell();
@@ -439,9 +433,9 @@ class SkulptApp {
                     cell.classList.add('filled', `multi-slot-${multiSlotInfo.position}`);
                     if (multiSlotInfo.position === 'start') {
                         const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
-                        const duration = multiSlotInfo.classData.duration || 45;
-                        const slots = Math.ceil(duration / 15);
-                        const height = slots * 25; // 25px per slot
+                        const duration = multiSlotInfo.classData.duration || 60;
+                        const slots = Math.ceil(duration / 30);
+                        const height = slots * 50; // 50px per 30-min slot
                         
                         cell.innerHTML = `
                             <div class="multi-slot-content" style="height: ${height}px; position: absolute; top: 0; left: 0; right: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, rgba(211, 183, 163, 0.2) 0%, rgba(211, 183, 163, 0.3) 100%); border: 1px solid rgba(211, 183, 163, 0.4); border-radius: 4px; padding: 4px; z-index: 10;">
@@ -466,10 +460,10 @@ class SkulptApp {
                         cell.classList.add('filled');
                         
                         // Check if this is a multi-slot class starting here
-                        const duration = classData.duration || 45;
-                        if (duration > 15) {
+                        const duration = classData.duration || 60;
+                        if (duration > 30) {
                             cell.classList.add('multi-slot-start');
-                            const slots = Math.ceil(duration / 15);
+                            const slots = Math.ceil(duration / 30);
                             cell.classList.add(`slots-${slots}`);
                         }
                         
@@ -538,15 +532,9 @@ class SkulptApp {
             const row = table.insertRow();
             const timeCell = row.insertCell();
             
-            // Only show time for hour marks (XX:00)
-            const isHourMark = time.includes(':00');
-            if (isHourMark) {
-                timeCell.textContent = time;
-                timeCell.className = 'time-cell hour-mark';
-            } else {
-                timeCell.textContent = '';
-                timeCell.className = 'time-cell quarter-hour';
-            }
+            // Show all times since we're using 30-minute intervals
+            timeCell.textContent = time;
+            timeCell.className = 'time-cell';
             
             this.days.forEach(day => {
                 // Movement room cell
@@ -579,10 +567,10 @@ class SkulptApp {
                         movementCell.classList.add('filled');
                         
                         // Check if this is a multi-slot class
-                        const duration = movementClass.duration || 45;
-                        if (duration > 15) {
+                        const duration = movementClass.duration || 60;
+                        if (duration > 30) {
                             movementCell.classList.add('multi-slot-start');
-                            const slots = Math.ceil(duration / 15);
+                            const slots = Math.ceil(duration / 30);
                             movementCell.classList.add(`slots-${slots}`);
                         }
                         
@@ -637,10 +625,10 @@ class SkulptApp {
                         reformerCell.classList.add('filled');
                         
                         // Check if this is a multi-slot class
-                        const duration = reformerClass.duration || 45;
-                        if (duration > 15) {
+                        const duration = reformerClass.duration || 60;
+                        if (duration > 30) {
                             reformerCell.classList.add('multi-slot-start');
-                            const slots = Math.ceil(duration / 15);
+                            const slots = Math.ceil(duration / 30);
                             reformerCell.classList.add(`slots-${slots}`);
                         }
                         
@@ -764,7 +752,7 @@ class SkulptApp {
         });
         
         // Set default duration to 45 minutes
-        this.selectedDuration = existingClass?.duration || 45;
+        this.selectedDuration = existingClass?.duration || 60;
         document.querySelectorAll('.duration-pill').forEach(pill => {
             pill.classList.toggle('active', parseInt(pill.dataset.duration) === this.selectedDuration);
         });
@@ -825,7 +813,7 @@ class SkulptApp {
                 teacher: teacherValue,
                 level: this.selectedLevel,
                 type: this.selectedType,
-                duration: this.selectedDuration || 45
+                duration: this.selectedDuration || 60
             };
             
             // Add start date if specified
@@ -1386,7 +1374,7 @@ class SkulptApp {
     getClassDuration(day, time, room) {
         const schedule = room === 'movement' ? this.movementSchedule : this.reformerSchedule;
         const classData = schedule[day] && schedule[day][time];
-        return classData ? (classData.duration || 45) : 0;
+        return classData ? (classData.duration || 60) : 0;
     }
 
     isMultiSlotOccupied(day, time, room) {
@@ -1398,8 +1386,8 @@ class SkulptApp {
             const prevTime = this.timeSlots[i];
             const prevClass = schedule[day] && schedule[day][prevTime];
             
-            if (prevClass && (prevClass.duration || 45) > 15) {
-                const slotsNeeded = Math.ceil((prevClass.duration || 45) / 15);
+            if (prevClass && (prevClass.duration || 60) > 30) {
+                const slotsNeeded = Math.ceil((prevClass.duration || 60) / 30);
                 const endIndex = i + slotsNeeded - 1;
                 
                 if (timeIndex <= endIndex) {
@@ -2362,7 +2350,7 @@ class SkulptApp {
         Object.keys(schedule).forEach(day => {
             Object.keys(schedule[day]).forEach(time => {
                 if (!schedule[day][time].duration) {
-                    schedule[day][time].duration = 45;
+                    schedule[day][time].duration = 60;
                     migrated = true;
                 }
             });
