@@ -389,19 +389,28 @@ class SkulptApp {
     buildSlotMap(schedule, day) {
         const slotMap = {};
         
+        // First pass: mark all start slots
         Object.entries(schedule[day] || {}).forEach(([time, classData]) => {
-            // Mark the starting slot
             slotMap[time] = { type: 'start', data: classData };
+        });
+        
+        // Second pass: mark continuation slots, checking for conflicts
+        Object.entries(schedule[day] || {}).forEach(([time, classData]) => {
+            const duration = classData.duration || 60;
             
-            // If class is longer than 30 minutes, mark continuation slots
-            if (classData.duration > 30) {
+            if (duration > 30) {
                 const timeIndex = this.timeSlots.indexOf(time);
-                const slotsNeeded = Math.ceil(classData.duration / 30);
+                const slotsNeeded = Math.ceil(duration / 30);
                 
                 for (let i = 1; i < slotsNeeded; i++) {
                     if (timeIndex + i < this.timeSlots.length) {
                         const continuationTime = this.timeSlots[timeIndex + i];
-                        slotMap[continuationTime] = { type: 'continuation', data: classData };
+                        
+                        // Only mark as continuation if the slot is empty
+                        // Don't overwrite start slots
+                        if (!slotMap[continuationTime]) {
+                            slotMap[continuationTime] = { type: 'continuation', data: classData };
+                        }
                     }
                 }
             }
@@ -2364,7 +2373,6 @@ class SkulptApp {
                         // This is a duplicate within the class duration, remove it
                         toDelete.push(time);
                         cleaned = true;
-                        console.log(`Removing duplicate: ${classKey} at ${time} on ${day}`);
                     } else {
                         // This is a new instance of the same class later in the day
                         seenClasses.set(classKey, time);
