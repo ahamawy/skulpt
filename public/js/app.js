@@ -457,8 +457,11 @@ class SkulptApp {
                         cell.classList.add('filled');
                         
                         // Check if this is a multi-slot class starting here
-                        if ((classData.duration || 45) > 15) {
+                        const duration = classData.duration || 45;
+                        if (duration > 15) {
                             cell.classList.add('multi-slot-start');
+                            const slots = Math.ceil(duration / 15);
+                            cell.classList.add(`slots-${slots}`);
                         }
                         
                         const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
@@ -567,8 +570,11 @@ class SkulptApp {
                         movementCell.classList.add('filled');
                         
                         // Check if this is a multi-slot class
-                        if ((movementClass.duration || 45) > 15) {
+                        const duration = movementClass.duration || 45;
+                        if (duration > 15) {
                             movementCell.classList.add('multi-slot-start');
+                            const slots = Math.ceil(duration / 15);
+                            movementCell.classList.add(`slots-${slots}`);
                         }
                         
                         const typeClass = movementClass.type === 'Ladies Only' ? 'ladies' : '';
@@ -622,8 +628,11 @@ class SkulptApp {
                         reformerCell.classList.add('filled');
                         
                         // Check if this is a multi-slot class
-                        if ((reformerClass.duration || 45) > 15) {
+                        const duration = reformerClass.duration || 45;
+                        if (duration > 15) {
                             reformerCell.classList.add('multi-slot-start');
+                            const slots = Math.ceil(duration / 15);
+                            reformerCell.classList.add(`slots-${slots}`);
                         }
                         
                         const typeClass = reformerClass.type === 'Ladies Only' ? 'ladies' : '';
