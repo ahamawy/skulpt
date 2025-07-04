@@ -579,15 +579,31 @@ h3 {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     margin-bottom: 0;
+    padding-bottom: 16px;
 }
 
+.class-cell.multi-slot-middle,
 .class-cell.multi-slot-end {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
     margin-top: 0;
-    background: transparent;
-    border: none;
+    margin-bottom: 0;
+    padding: 0;
     min-height: 50px;
+}
+
+.class-cell.filled.multi-slot-middle,
+.class-cell.filled.multi-slot-end {
+    background: linear-gradient(135deg, rgba(211, 183, 163, 0.2) 0%, rgba(211, 183, 163, 0.3) 100%);
+    border-left: 1px solid rgba(211, 183, 163, 0.4);
+    border-right: 1px solid rgba(211, 183, 163, 0.4);
+    border-top: none;
+    border-bottom: 1px solid rgba(211, 183, 163, 0.4);
+    border-radius: 0;
+}
+
+.class-cell.filled.multi-slot-end {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    padding-bottom: 8px;
 }
 
 /* Multi-slot content spans 2 cells */
