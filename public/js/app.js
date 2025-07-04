@@ -467,31 +467,35 @@ class SkulptApp {
                         
                         const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
                         cell.innerHTML = `
-                            <div class="class-name">${classData.class}</div>
-                            <div class="teacher-name">${classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${classData.level || ''}</span>
-                                <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
+                            <div class="class-cell-content">
+                                <div class="class-name">${classData.class}</div>
+                                <div class="teacher-name">${classData.teacher}</div>
+                                <div class="class-info">
+                                    <span class="class-level">${classData.level || ''}</span>
+                                    <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
+                                </div>
                             </div>
                         `;
                     } else if (slotInfo.type === 'continuation' && this.isClassActive(classData)) {
                         // This is a continuation slot
                         cell.classList.add('filled', 'multi-slot-continuation');
-                        cell.innerHTML = ''; // Empty continuation
+                        cell.innerHTML = '<div class="class-cell-content"></div>'; // Empty continuation with wrapper
                         cell.onclick = null; // Disable clicking
                     } else if (slotInfo.type === 'start' && !this.isClassActive(classData)) {
                         // Future class
                         cell.classList.add('future');
                         const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         cell.innerHTML = `
-                            <div class="class-name future-class">${classData.class}</div>
-                            <div class="class-future">Starts ${startDate}</div>
+                            <div class="class-cell-content">
+                                <div class="class-name future-class">${classData.class}</div>
+                                <div class="class-future">Starts ${startDate}</div>
+                            </div>
                         `;
                         cell.onclick = () => this.openModal(day, time, cell, room);
                     }
                 } else {
                     // Empty slot
-                    cell.innerHTML = '<span class="empty-cell">+ Add class</span>';
+                    cell.innerHTML = '<div class="class-cell-content"><span class="empty-cell">+ Add class</span></div>';
                     cell.onclick = () => this.openModal(day, time, cell, room);
                 }
             });
@@ -560,31 +564,35 @@ class SkulptApp {
                         
                         const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
                         movementCell.innerHTML = `
-                            <div class="class-name">${classData.class}</div>
-                            <div class="teacher-name">${classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${classData.level || ''}</span>
-                                <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
+                            <div class="class-cell-content">
+                                <div class="class-name">${classData.class}</div>
+                                <div class="teacher-name">${classData.teacher}</div>
+                                <div class="class-info">
+                                    <span class="class-level">${classData.level || ''}</span>
+                                    <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
+                                </div>
                             </div>
                         `;
                     } else if (movementSlotInfo.type === 'continuation' && this.isClassActive(classData)) {
                         // This is a continuation slot
                         movementCell.classList.add('filled', 'multi-slot-continuation');
-                        movementCell.innerHTML = ''; // Empty continuation
+                        movementCell.innerHTML = '<div class="class-cell-content"></div>'; // Empty continuation
                         movementCell.onclick = null; // Disable clicking
                     } else if (movementSlotInfo.type === 'start' && !this.isClassActive(classData)) {
                         // Future class
                         movementCell.classList.add('future');
                         const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         movementCell.innerHTML = `
-                            <div class="class-name future-class">${classData.class}</div>
-                            <div class="class-future">Starts ${startDate}</div>
+                            <div class="class-cell-content">
+                                <div class="class-name future-class">${classData.class}</div>
+                                <div class="class-future">Starts ${startDate}</div>
+                            </div>
                         `;
                         movementCell.onclick = () => this.openModal(day, time, movementCell, 'movement');
                     }
                 } else {
                     // Empty slot
-                    movementCell.innerHTML = '<span class="empty-cell">+</span>';
+                    movementCell.innerHTML = '<div class="class-cell-content"><span class="empty-cell">+</span></div>';
                     movementCell.onclick = () => this.openModal(day, time, movementCell, 'movement');
                 }
                 
@@ -610,31 +618,35 @@ class SkulptApp {
                         
                         const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
                         reformerCell.innerHTML = `
-                            <div class="class-name">${classData.class}</div>
-                            <div class="teacher-name">${classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${classData.level || ''}</span>
-                                <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
+                            <div class="class-cell-content">
+                                <div class="class-name">${classData.class}</div>
+                                <div class="teacher-name">${classData.teacher}</div>
+                                <div class="class-info">
+                                    <span class="class-level">${classData.level || ''}</span>
+                                    <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
+                                </div>
                             </div>
                         `;
                     } else if (reformerSlotInfo.type === 'continuation' && this.isClassActive(classData)) {
                         // This is a continuation slot
                         reformerCell.classList.add('filled', 'multi-slot-continuation');
-                        reformerCell.innerHTML = ''; // Empty continuation
+                        reformerCell.innerHTML = '<div class="class-cell-content"></div>'; // Empty continuation
                         reformerCell.onclick = null; // Disable clicking
                     } else if (reformerSlotInfo.type === 'start' && !this.isClassActive(classData)) {
                         // Future class
                         reformerCell.classList.add('future');
                         const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         reformerCell.innerHTML = `
-                            <div class="class-name future-class">${classData.class}</div>
-                            <div class="class-future">Starts ${startDate}</div>
+                            <div class="class-cell-content">
+                                <div class="class-name future-class">${classData.class}</div>
+                                <div class="class-future">Starts ${startDate}</div>
+                            </div>
                         `;
                         reformerCell.onclick = () => this.openModal(day, time, reformerCell, 'reformer');
                     }
                 } else {
                     // Empty slot
-                    reformerCell.innerHTML = '<span class="empty-cell">+</span>';
+                    reformerCell.innerHTML = '<div class="class-cell-content"><span class="empty-cell">+</span></div>';
                     reformerCell.onclick = () => this.openModal(day, time, reformerCell, 'reformer');
                 }
             });
