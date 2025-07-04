@@ -1,0 +1,24 @@
+<\!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Schedule</title>
+</head>
+<body>
+    <h1>Schedule Debug</h1>
+    <div id="output"></div>
+    <script>
+        // Load the schedule from localStorage
+        const movementSchedule = JSON.parse(localStorage.getItem('movementSchedule') || '{}');
+        const reformerSchedule = JSON.parse(localStorage.getItem('reformerSchedule') || '{}');
+        
+        let output = '<h2>Movement Schedule Raw Data:</h2><pre>';
+        output += JSON.stringify(movementSchedule, null, 2);
+        output += '</pre><h2>Reformer Schedule Raw Data:</h2><pre>';
+        output += JSON.stringify(reformerSchedule, null, 2);
+        output += '</pre>';
+        
+        document.getElementById('output').innerHTML = output;
+    </script>
+</body>
+</html>
+EOF < /dev/null

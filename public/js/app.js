@@ -2314,10 +2314,74 @@ class SkulptApp {
                 }
             });
         });
-        if (migrated) {
+        
+        // Clean up duplicate entries from old system
+        const cleaned = this.cleanupDuplicateEntries(schedule);
+        
+        if (migrated || cleaned) {
             // Save the migrated data
             this.saveScheduleData();
         }
+    }
+    
+    cleanupDuplicateEntries(schedule) {
+        let cleaned = false;
+        
+        Object.keys(schedule).forEach(day => {
+            const daySchedule = schedule[day];
+            const seenClasses = new Map(); // Track class+teacher combos
+            const toDelete = [];
+            
+            // Sort times to process in chronological order
+            const sortedTimes = Object.keys(daySchedule).sort((a, b) => {
+                const timeA = this.parseTime(a);
+                const timeB = this.parseTime(b);
+                return timeA - timeB;
+            });
+            
+            sortedTimes.forEach(time => {
+                const classData = daySchedule[time];
+                const classKey = `${classData.class}-${classData.teacher}`;
+                
+                if (seenClasses.has(classKey)) {
+                    // This is a duplicate - check if it's within the duration window
+                    const firstTime = seenClasses.get(classKey);
+                    const timeDiff = this.getTimeDifference(firstTime, time);
+                    
+                    if (timeDiff < (classData.duration || 60)) {
+                        // This is a duplicate within the class duration, remove it
+                        toDelete.push(time);
+                        cleaned = true;
+                        console.log(`Removing duplicate: ${classKey} at ${time} on ${day}`);
+                    } else {
+                        // This is a new instance of the same class later in the day
+                        seenClasses.set(classKey, time);
+                    }
+                } else {
+                    // First occurrence of this class
+                    seenClasses.set(classKey, time);
+                }
+            });
+            
+            // Delete the duplicate entries
+            toDelete.forEach(time => {
+                delete daySchedule[time];
+            });
+        });
+        
+        return cleaned;
+    }
+    
+    parseTime(timeStr) {
+        const [time, period] = timeStr.split(' ');
+        let [hours, minutes] = time.split(':').map(Number);
+        if (period === 'PM' && hours !== 12) hours += 12;
+        if (period === 'AM' && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+    }
+    
+    getTimeDifference(time1, time2) {
+        return Math.abs(this.parseTime(time2) - this.parseTime(time1));
     }
 }
 
