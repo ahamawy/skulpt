@@ -386,6 +386,30 @@ class SkulptApp {
         }
     }
 
+    buildSlotMap(schedule, day) {
+        const slotMap = {};
+        
+        Object.entries(schedule[day] || {}).forEach(([time, classData]) => {
+            // Mark the starting slot
+            slotMap[time] = { type: 'start', data: classData };
+            
+            // If class is longer than 30 minutes, mark continuation slots
+            if (classData.duration > 30) {
+                const timeIndex = this.timeSlots.indexOf(time);
+                const slotsNeeded = Math.ceil(classData.duration / 30);
+                
+                for (let i = 1; i < slotsNeeded; i++) {
+                    if (timeIndex + i < this.timeSlots.length) {
+                        const continuationTime = this.timeSlots[timeIndex + i];
+                        slotMap[continuationTime] = { type: 'continuation', data: classData };
+                    }
+                }
+            }
+        });
+        
+        return slotMap;
+    }
+
     isClassActive(classData) {
         if (!classData.startDate) return true; // No start date means always active
         
@@ -424,65 +448,51 @@ class SkulptApp {
             this.days.forEach(day => {
                 const cell = row.insertCell();
                 cell.className = 'class-cell';
-                cell.onclick = () => this.openModal(day, time, cell, room);
                 
-                // Check if this slot is part of a multi-slot class
-                const multiSlotInfo = this.isMultiSlotOccupied(day, time, room);
+                // Build slot map for this day
+                const slotMap = this.buildSlotMap(schedule, day);
+                const slotInfo = slotMap[time];
                 
-                if (multiSlotInfo.occupied) {
-                    cell.classList.add('filled', `multi-slot-${multiSlotInfo.position}`);
-                    if (multiSlotInfo.position === 'start') {
-                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
-                        cell.innerHTML = `
-                            <div class="class-name">${multiSlotInfo.classData.class}</div>
-                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${multiSlotInfo.classData.level || ''}</span>
-                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type || 'Mixed'}</span>
-                            </div>
-                        `;
-                    } else {
-                        cell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
-                        cell.onclick = null; // Disable clicking on occupied slots
-                    }
-                } else {
-                    const classData = schedule[day] && schedule[day][time];
-                    if (classData && this.isClassActive(classData)) {
+                if (slotInfo) {
+                    const classData = slotInfo.data;
+                    
+                    if (slotInfo.type === 'start' && this.isClassActive(classData)) {
+                        // This is the start of a class
                         cell.classList.add('filled');
+                        cell.onclick = () => this.openModal(day, time, cell, room);
                         
-                        // Check if this is a multi-slot class starting here
-                        const duration = classData.duration || 60;
-                        if (duration > 30) {
+                        if (classData.duration > 30) {
                             cell.classList.add('multi-slot-start');
-                            const slots = Math.ceil(duration / 30);
-                            cell.classList.add(`slots-${slots}`);
                         }
                         
                         const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
-                        let dateInfo = '';
-                        if (classData.startDate && !this.isClassActive(classData)) {
-                            const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                            dateInfo = `<span class="class-future">Starts ${startDate}</span>`;
-                        }
                         cell.innerHTML = `
                             <div class="class-name">${classData.class}</div>
                             <div class="teacher-name">${classData.teacher}</div>
                             <div class="class-info">
                                 <span class="class-level">${classData.level || ''}</span>
                                 <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
-                                ${dateInfo}
                             </div>
                         `;
-                    } else if (classData && !this.isClassActive(classData)) {
+                    } else if (slotInfo.type === 'continuation' && this.isClassActive(classData)) {
+                        // This is a continuation slot
+                        cell.classList.add('filled', 'multi-slot-continuation');
+                        cell.innerHTML = ''; // Empty continuation
+                        cell.onclick = null; // Disable clicking
+                    } else if (slotInfo.type === 'start' && !this.isClassActive(classData)) {
+                        // Future class
                         cell.classList.add('future');
                         const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         cell.innerHTML = `
                             <div class="class-name future-class">${classData.class}</div>
                             <div class="class-future">Starts ${startDate}</div>
                         `;
-                    } else {
-                        cell.innerHTML = '<span class="empty-cell">+ Add class</span>';
+                        cell.onclick = () => this.openModal(day, time, cell, room);
                     }
+                } else {
+                    // Empty slot
+                    cell.innerHTML = '<span class="empty-cell">+ Add class</span>';
+                    cell.onclick = () => this.openModal(day, time, cell, room);
                 }
             });
         });
@@ -531,117 +541,101 @@ class SkulptApp {
                 // Movement room cell
                 const movementCell = row.insertCell();
                 movementCell.className = 'class-cell movement-room';
-                movementCell.onclick = () => this.openModal(day, time, movementCell, 'movement');
                 
-                // Check if this slot is part of a multi-slot class
-                const multiSlotInfo = this.isMultiSlotOccupied(day, time, 'movement');
+                // Build slot map for movement room
+                const movementSlotMap = this.buildSlotMap(this.movementSchedule, day);
+                const movementSlotInfo = movementSlotMap[time];
                 
-                if (multiSlotInfo.occupied) {
-                    movementCell.classList.add('filled', `multi-slot-${multiSlotInfo.position}`);
-                    if (multiSlotInfo.position === 'start') {
-                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
-                        movementCell.innerHTML = `
-                            <div class="class-name">${multiSlotInfo.classData.class}</div>
-                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${multiSlotInfo.classData.level}</span>
-                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type}</span>
-                            </div>
-                        `;
-                    } else {
-                        movementCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
-                    }
-                    movementCell.onclick = null; // Disable clicking on occupied slots
-                } else {
-                    const movementClass = this.movementSchedule[day] && this.movementSchedule[day][time];
-                    if (movementClass && this.isClassActive(movementClass)) {
+                if (movementSlotInfo) {
+                    const classData = movementSlotInfo.data;
+                    
+                    if (movementSlotInfo.type === 'start' && this.isClassActive(classData)) {
+                        // This is the start of a class
                         movementCell.classList.add('filled');
+                        movementCell.onclick = () => this.openModal(day, time, movementCell, 'movement');
                         
-                        // Check if this is a multi-slot class
-                        const duration = movementClass.duration || 60;
-                        if (duration > 30) {
+                        if (classData.duration > 30) {
                             movementCell.classList.add('multi-slot-start');
-                            const slots = Math.ceil(duration / 30);
-                            movementCell.classList.add(`slots-${slots}`);
                         }
                         
-                        const typeClass = movementClass.type === 'Ladies Only' ? 'ladies' : '';
+                        const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
                         movementCell.innerHTML = `
-                            <div class="class-name">${movementClass.class}</div>
-                            <div class="teacher-name">${movementClass.teacher}</div>
+                            <div class="class-name">${classData.class}</div>
+                            <div class="teacher-name">${classData.teacher}</div>
                             <div class="class-info">
-                                <span class="class-level">${movementClass.level}</span>
-                                <span class="class-type ${typeClass}">${movementClass.type}</span>
+                                <span class="class-level">${classData.level || ''}</span>
+                                <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
                             </div>
                         `;
-                    } else if (movementClass && !this.isClassActive(movementClass)) {
+                    } else if (movementSlotInfo.type === 'continuation' && this.isClassActive(classData)) {
+                        // This is a continuation slot
+                        movementCell.classList.add('filled', 'multi-slot-continuation');
+                        movementCell.innerHTML = ''; // Empty continuation
+                        movementCell.onclick = null; // Disable clicking
+                    } else if (movementSlotInfo.type === 'start' && !this.isClassActive(classData)) {
+                        // Future class
                         movementCell.classList.add('future');
-                        const startDate = new Date(movementClass.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         movementCell.innerHTML = `
-                            <div class="class-name future-class">${movementClass.class}</div>
+                            <div class="class-name future-class">${classData.class}</div>
                             <div class="class-future">Starts ${startDate}</div>
                         `;
-                    } else {
-                        movementCell.innerHTML = '<span class="empty-cell">+</span>';
+                        movementCell.onclick = () => this.openModal(day, time, movementCell, 'movement');
                     }
+                } else {
+                    // Empty slot
+                    movementCell.innerHTML = '<span class="empty-cell">+</span>';
+                    movementCell.onclick = () => this.openModal(day, time, movementCell, 'movement');
                 }
                 
                 // Reformer room cell
                 const reformerCell = row.insertCell();
                 reformerCell.className = 'class-cell reformer-room';
-                reformerCell.onclick = () => this.openModal(day, time, reformerCell, 'reformer');
                 
-                // Check if this slot is part of a multi-slot class
-                const reformerMultiSlotInfo = this.isMultiSlotOccupied(day, time, 'reformer');
+                // Build slot map for reformer room
+                const reformerSlotMap = this.buildSlotMap(this.reformerSchedule, day);
+                const reformerSlotInfo = reformerSlotMap[time];
                 
-                if (reformerMultiSlotInfo.occupied) {
-                    reformerCell.classList.add('filled', `multi-slot-${reformerMultiSlotInfo.position}`);
-                    if (reformerMultiSlotInfo.position === 'start') {
-                        const typeClass = reformerMultiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
-                        reformerCell.innerHTML = `
-                            <div class="class-name">${reformerMultiSlotInfo.classData.class}</div>
-                            <div class="teacher-name">${reformerMultiSlotInfo.classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${reformerMultiSlotInfo.classData.level}</span>
-                                <span class="class-type ${typeClass}">${reformerMultiSlotInfo.classData.type}</span>
-                            </div>
-                        `;
-                    } else {
-                        reformerCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
-                    }
-                    reformerCell.onclick = null; // Disable clicking on occupied slots
-                } else {
-                    const reformerClass = this.reformerSchedule[day] && this.reformerSchedule[day][time];
-                    if (reformerClass && this.isClassActive(reformerClass)) {
+                if (reformerSlotInfo) {
+                    const classData = reformerSlotInfo.data;
+                    
+                    if (reformerSlotInfo.type === 'start' && this.isClassActive(classData)) {
+                        // This is the start of a class
                         reformerCell.classList.add('filled');
+                        reformerCell.onclick = () => this.openModal(day, time, reformerCell, 'reformer');
                         
-                        // Check if this is a multi-slot class
-                        const duration = reformerClass.duration || 60;
-                        if (duration > 30) {
+                        if (classData.duration > 30) {
                             reformerCell.classList.add('multi-slot-start');
-                            const slots = Math.ceil(duration / 30);
-                            reformerCell.classList.add(`slots-${slots}`);
                         }
                         
-                        const typeClass = reformerClass.type === 'Ladies Only' ? 'ladies' : '';
+                        const typeClass = classData.type === 'Ladies Only' ? 'ladies' : '';
                         reformerCell.innerHTML = `
-                            <div class="class-name">${reformerClass.class}</div>
-                            <div class="teacher-name">${reformerClass.teacher}</div>
+                            <div class="class-name">${classData.class}</div>
+                            <div class="teacher-name">${classData.teacher}</div>
                             <div class="class-info">
-                                <span class="class-level">${reformerClass.level}</span>
-                                <span class="class-type ${typeClass}">${reformerClass.type}</span>
+                                <span class="class-level">${classData.level || ''}</span>
+                                <span class="class-type ${typeClass}">${classData.type || 'Mixed'}</span>
                             </div>
                         `;
-                    } else if (reformerClass && !this.isClassActive(reformerClass)) {
+                    } else if (reformerSlotInfo.type === 'continuation' && this.isClassActive(classData)) {
+                        // This is a continuation slot
+                        reformerCell.classList.add('filled', 'multi-slot-continuation');
+                        reformerCell.innerHTML = ''; // Empty continuation
+                        reformerCell.onclick = null; // Disable clicking
+                    } else if (reformerSlotInfo.type === 'start' && !this.isClassActive(classData)) {
+                        // Future class
                         reformerCell.classList.add('future');
-                        const startDate = new Date(reformerClass.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const startDate = new Date(classData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         reformerCell.innerHTML = `
-                            <div class="class-name future-class">${reformerClass.class}</div>
+                            <div class="class-name future-class">${classData.class}</div>
                             <div class="class-future">Starts ${startDate}</div>
                         `;
-                    } else {
-                        reformerCell.innerHTML = '<span class="empty-cell">+</span>';
+                        reformerCell.onclick = () => this.openModal(day, time, reformerCell, 'reformer');
                     }
+                } else {
+                    // Empty slot
+                    reformerCell.innerHTML = '<span class="empty-cell">+</span>';
+                    reformerCell.onclick = () => this.openModal(day, time, reformerCell, 'reformer');
                 }
             });
         });
@@ -1368,33 +1362,6 @@ class SkulptApp {
         return classData ? (classData.duration || 60) : 0;
     }
 
-    isMultiSlotOccupied(day, time, room) {
-        const schedule = room === 'movement' ? this.movementSchedule : this.reformerSchedule;
-        const timeIndex = this.timeSlots.indexOf(time);
-        
-        // Check if this slot is occupied by a multi-slot class from a previous time
-        // For 30-min slots, only need to check 1 slot back for 60-min classes
-        for (let i = Math.max(0, timeIndex - 1); i < timeIndex; i++) {
-            const prevTime = this.timeSlots[i];
-            const prevClass = schedule[day] && schedule[day][prevTime];
-            
-            if (prevClass && (prevClass.duration || 60) > 30) {
-                const slotsNeeded = Math.ceil((prevClass.duration || 60) / 30);
-                const endIndex = i + slotsNeeded - 1;
-                
-                if (timeIndex <= endIndex) {
-                    return {
-                        occupied: true,
-                        startTime: prevTime,
-                        position: timeIndex === i ? 'start' : (timeIndex === endIndex ? 'end' : 'middle'),
-                        classData: prevClass
-                    };
-                }
-            }
-        }
-        
-        return { occupied: false };
-    }
 
     toggleExportMenu() {
         const menu = document.getElementById('exportMenu');
