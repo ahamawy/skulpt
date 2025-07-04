@@ -582,76 +582,15 @@ h3 {
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Multi-slot class styles - create seamless blocks */
-.class-cell.multi-slot-start {
-    border-bottom: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    padding-bottom: 8px;
-}
-
-.class-cell.multi-slot-middle {
-    border-top: none !important;
-    border-bottom: none !important;
-    border-radius: 0;
-    padding: 0 2px;
-    min-height: 25px;
-}
-
-.class-cell.multi-slot-end {
-    border-top: none;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    padding-top: 8px;
-}
-
-/* Create a unified block appearance */
-.class-cell.multi-slot-start,
-.class-cell.multi-slot-middle,
-.class-cell.multi-slot-end {
-    position: relative;
-}
-
-/* Multi-slot unified display */
-.class-cell.multi-slot-start {
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+/* Multi-slot positioning */
+.multi-slot-content {
     text-align: center;
 }
 
-/* Adjust heights for different durations */
-.class-cell.multi-slot-start.slots-2 {
-    height: calc(50px - 2px); /* 2 slots minus borders */
-}
-
-.class-cell.multi-slot-start.slots-3 {
-    height: calc(75px - 3px); /* 3 slots minus borders */
-}
-
-.class-cell.multi-slot-start.slots-4 {
-    height: calc(100px - 4px); /* 4 slots minus borders */
-}
-
-/* Ensure text is properly visible in multi-slot cells */
-.class-cell.multi-slot-start .class-name,
-.class-cell.multi-slot-start .teacher-name,
-.class-cell.multi-slot-start .class-info {
-    display: block;
-}
-
-/* Hide only the middle and end slot contents since they'll be empty */
-.class-cell.multi-slot-middle,
-.class-cell.multi-slot-end {
-    font-size: 0;
-}
-
-.class-cell.multi-slot-middle {
-    background: linear-gradient(to bottom, 
-        rgba(211, 183, 163, 0.15) 0%, 
-        rgba(211, 183, 163, 0.15) 100%);
+.multi-slot-content .class-name,
+.multi-slot-content .teacher-name,
+.multi-slot-content .class-info {
+    display: block !important;
 }
 
 

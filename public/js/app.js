@@ -439,16 +439,25 @@ class SkulptApp {
                     cell.classList.add('filled', `multi-slot-${multiSlotInfo.position}`);
                     if (multiSlotInfo.position === 'start') {
                         const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
+                        const duration = multiSlotInfo.classData.duration || 45;
+                        const slots = Math.ceil(duration / 15);
+                        const height = slots * 25; // 25px per slot
+                        
                         cell.innerHTML = `
-                            <div class="class-name">${multiSlotInfo.classData.class}</div>
-                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${multiSlotInfo.classData.level || ''}</span>
-                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type || 'Mixed'}</span>
+                            <div class="multi-slot-content" style="height: ${height}px; position: absolute; top: 0; left: 0; right: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, rgba(211, 183, 163, 0.2) 0%, rgba(211, 183, 163, 0.3) 100%); border: 1px solid rgba(211, 183, 163, 0.4); border-radius: 4px; padding: 4px; z-index: 10;">
+                                <div class="class-name">${multiSlotInfo.classData.class}</div>
+                                <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
+                                <div class="class-info">
+                                    <span class="class-level">${multiSlotInfo.classData.level || ''}</span>
+                                    <span class="class-type ${typeClass}">${multiSlotInfo.classData.type || 'Mixed'}</span>
+                                </div>
                             </div>
                         `;
+                        cell.style.position = 'relative';
                     } else {
-                        cell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
+                        cell.innerHTML = '';
+                        cell.style.background = 'transparent';
+                        cell.style.border = 'none';
                         cell.onclick = null; // Disable clicking on occupied slots
                     }
                 } else {
