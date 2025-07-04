@@ -448,7 +448,16 @@ class SkulptApp {
                             </div>
                         `;
                     } else {
-                        cell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
+                        // Show content in middle and end slots as well
+                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
+                        cell.innerHTML = `
+                            <div class="class-name">${multiSlotInfo.classData.class}</div>
+                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${multiSlotInfo.classData.level || ''}</span>
+                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type || 'Mixed'}</span>
+                            </div>
+                        `;
                         cell.onclick = null; // Disable clicking on occupied slots
                     }
                 } else {
@@ -547,7 +556,28 @@ class SkulptApp {
                 
                 if (multiSlotInfo.occupied) {
                     movementCell.classList.add('filled', `multi-slot-${multiSlotInfo.position}`);
-                    movementCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
+                    if (multiSlotInfo.position === 'start') {
+                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
+                        movementCell.innerHTML = `
+                            <div class="class-name">${multiSlotInfo.classData.class}</div>
+                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${multiSlotInfo.classData.level}</span>
+                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type}</span>
+                            </div>
+                        `;
+                    } else {
+                        // Show content in middle and end slots as well
+                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
+                        movementCell.innerHTML = `
+                            <div class="class-name">${multiSlotInfo.classData.class}</div>
+                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${multiSlotInfo.classData.level}</span>
+                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type}</span>
+                            </div>
+                        `;
+                    }
                     movementCell.onclick = null; // Disable clicking on occupied slots
                 } else {
                     const movementClass = this.movementSchedule[day] && this.movementSchedule[day][time];
@@ -590,7 +620,28 @@ class SkulptApp {
                 
                 if (reformerMultiSlotInfo.occupied) {
                     reformerCell.classList.add('filled', `multi-slot-${reformerMultiSlotInfo.position}`);
-                    reformerCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
+                    if (reformerMultiSlotInfo.position === 'start') {
+                        const typeClass = reformerMultiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
+                        reformerCell.innerHTML = `
+                            <div class="class-name">${reformerMultiSlotInfo.classData.class}</div>
+                            <div class="teacher-name">${reformerMultiSlotInfo.classData.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${reformerMultiSlotInfo.classData.level}</span>
+                                <span class="class-type ${typeClass}">${reformerMultiSlotInfo.classData.type}</span>
+                            </div>
+                        `;
+                    } else {
+                        // Show content in middle and end slots as well
+                        const typeClass = reformerMultiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
+                        reformerCell.innerHTML = `
+                            <div class="class-name">${reformerMultiSlotInfo.classData.class}</div>
+                            <div class="teacher-name">${reformerMultiSlotInfo.classData.teacher}</div>
+                            <div class="class-info">
+                                <span class="class-level">${reformerMultiSlotInfo.classData.level}</span>
+                                <span class="class-type ${typeClass}">${reformerMultiSlotInfo.classData.type}</span>
+                            </div>
+                        `;
+                    }
                     reformerCell.onclick = null; // Disable clicking on occupied slots
                 } else {
                     const reformerClass = this.reformerSchedule[day] && this.reformerSchedule[day][time];
@@ -933,55 +984,67 @@ class SkulptApp {
             '#A89F9A'  // Another mid tone
         ];
 
-        // 1. Teacher Load Distribution
+        // 1. Teacher Load Distribution - Changed to Bar Chart
         const teacherCtx = document.getElementById('teacherLoadChart');
         if (teacherCtx) {
             const teacherChart = Chart.getChart('teacherLoadChart');
             if (teacherChart) teacherChart.destroy();
             
+            // Sort teachers by class count for better visualization
+            const sortedTeacherData = Object.entries(teacherCounts)
+                .sort((a, b) => b[1] - a[1]);
+            
             new Chart(teacherCtx, {
-                type: 'pie',
+                type: 'bar',
                 data: {
-                    labels: Object.keys(teacherCounts),
+                    labels: sortedTeacherData.map(([name]) => name),
                     datasets: [{
-                        data: Object.values(teacherCounts),
-                        backgroundColor: brandColors,
-                        borderColor: '#FFFFFF',
-                        borderWidth: 2
+                        label: 'Number of Classes',
+                        data: sortedTeacherData.map(([, count]) => count),
+                        backgroundColor: '#D3B7A3',
+                        borderColor: '#D3B7A3',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        barThickness: 'flex',
+                        maxBarThickness: 50
                     }]
                 },
                 options: {
+                    indexAxis: 'y', // Horizontal bars
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                font: { size: 11 },
-                                color: '#4A4A4A',
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    return data.labels.map((label, i) => {
-                                        const value = data.datasets[0].data[i];
-                                        return {
-                                            text: label + ' (' + value + ')',
-                                            fillStyle: data.datasets[0].backgroundColor[i],
-                                            hidden: false,
-                                            index: i
-                                        };
-                                    });
-                                }
-                            }
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const value = context.raw;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return context.label + ': ' + value + ' classes (' + percentage + '%)';
+                                    return context.dataset.label + ': ' + context.raw + ' classes';
                                 }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                color: '#4A4A4A',
+                                font: { size: 11 },
+                                stepSize: 1
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#4A4A4A',
+                                font: { size: 11 }
                             }
                         }
                     }
@@ -1974,6 +2037,7 @@ class SkulptApp {
                     <span class="list-item-info">${classCount} classes</span>
                 </div>
                 <div class="list-item-actions">
+                    <button class="btn btn-small btn-primary" onclick="window.skulptApp.editTeacher('${teacher}', '${room}')">Edit</button>
                     <button class="btn btn-small btn-danger" onclick="window.skulptApp.deleteTeacher('${teacher}', '${room}')">Delete</button>
                 </div>
             `;
@@ -1995,6 +2059,7 @@ class SkulptApp {
                     <span class="list-item-info">Default: ${defaultLevel}</span>
                 </div>
                 <div class="list-item-actions">
+                    <button class="btn btn-small btn-primary" onclick="window.skulptApp.editClass('${className}', '${room}')">Edit</button>
                     <button class="btn btn-small btn-danger" onclick="window.skulptApp.deleteClass('${className}', '${room}')">Delete</button>
                 </div>
             `;
@@ -2048,6 +2113,43 @@ class SkulptApp {
         this.saveTeachersAndClasses();
         this.renderTeachersList(room);
         this.showNotification(`Teacher ${name} added successfully`, 'success');
+    }
+
+    editTeacher(oldName, room) {
+        const newName = prompt('Edit teacher name:', oldName);
+        if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+        
+        const teachers = room === 'movement' ? this.movementTeachers : this.reformerTeachers;
+        
+        // Check if new name already exists
+        if (teachers.includes(newName.trim())) {
+            this.showNotification('Teacher name already exists', 'error');
+            return;
+        }
+        
+        // Update teacher array
+        const index = teachers.indexOf(oldName);
+        if (index !== -1) {
+            teachers[index] = newName.trim();
+            teachers.sort();
+        }
+        
+        // Update all schedule entries
+        const schedule = room === 'movement' ? this.movementSchedule : this.reformerSchedule;
+        Object.keys(schedule).forEach(day => {
+            Object.keys(schedule[day]).forEach(time => {
+                if (schedule[day][time].teacher === oldName) {
+                    schedule[day][time].teacher = newName.trim();
+                }
+            });
+        });
+        
+        this.saveTeachersAndClasses();
+        this.saveScheduleData();
+        this.renderTeachersList(room);
+        this.renderSchedule();
+        this.updateStats();
+        this.showNotification(`Teacher name updated successfully`, 'success');
     }
 
     deleteTeacher(teacher, room) {
@@ -2154,6 +2256,50 @@ class SkulptApp {
         this.saveTeachersAndClasses();
         this.renderClassesList(room);
         this.showNotification(`Class type ${name} added successfully`, 'success');
+    }
+
+    editClass(oldName, room) {
+        const newName = prompt('Edit class name:', oldName);
+        if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+        
+        const classes = room === 'movement' ? this.movementClassesData : this.reformerClassesData;
+        
+        // Check if new name already exists
+        if (classes.hasOwnProperty(newName.trim())) {
+            this.showNotification('Class name already exists', 'error');
+            return;
+        }
+        
+        // Save the default level
+        const defaultLevel = classes[oldName];
+        
+        // Update classes object
+        delete classes[oldName];
+        classes[newName.trim()] = defaultLevel;
+        
+        // Update class arrays
+        if (room === 'movement') {
+            this.movementClasses = Object.keys(this.movementClassesData);
+        } else {
+            this.reformerClasses = Object.keys(this.reformerClassesData);
+        }
+        
+        // Update all schedule entries
+        const schedule = room === 'movement' ? this.movementSchedule : this.reformerSchedule;
+        Object.keys(schedule).forEach(day => {
+            Object.keys(schedule[day]).forEach(time => {
+                if (schedule[day][time].class === oldName) {
+                    schedule[day][time].class = newName.trim();
+                }
+            });
+        });
+        
+        this.saveTeachersAndClasses();
+        this.saveScheduleData();
+        this.renderClassesList(room);
+        this.renderSchedule();
+        this.updateStats();
+        this.showNotification(`Class name updated successfully`, 'success');
     }
 
     deleteClass(className, room) {
