@@ -448,16 +448,7 @@ class SkulptApp {
                             </div>
                         `;
                     } else {
-                        // Show content in middle and end slots as well
-                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
-                        cell.innerHTML = `
-                            <div class="class-name">${multiSlotInfo.classData.class}</div>
-                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${multiSlotInfo.classData.level || ''}</span>
-                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type || 'Mixed'}</span>
-                            </div>
-                        `;
+                        cell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
                         cell.onclick = null; // Disable clicking on occupied slots
                     }
                 } else {
@@ -567,16 +558,7 @@ class SkulptApp {
                             </div>
                         `;
                     } else {
-                        // Show content in middle and end slots as well
-                        const typeClass = multiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
-                        movementCell.innerHTML = `
-                            <div class="class-name">${multiSlotInfo.classData.class}</div>
-                            <div class="teacher-name">${multiSlotInfo.classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${multiSlotInfo.classData.level}</span>
-                                <span class="class-type ${typeClass}">${multiSlotInfo.classData.type}</span>
-                            </div>
-                        `;
+                        movementCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
                     }
                     movementCell.onclick = null; // Disable clicking on occupied slots
                 } else {
@@ -631,16 +613,7 @@ class SkulptApp {
                             </div>
                         `;
                     } else {
-                        // Show content in middle and end slots as well
-                        const typeClass = reformerMultiSlotInfo.classData.type === 'Ladies Only' ? 'ladies' : '';
-                        reformerCell.innerHTML = `
-                            <div class="class-name">${reformerMultiSlotInfo.classData.class}</div>
-                            <div class="teacher-name">${reformerMultiSlotInfo.classData.teacher}</div>
-                            <div class="class-info">
-                                <span class="class-level">${reformerMultiSlotInfo.classData.level}</span>
-                                <span class="class-type ${typeClass}">${reformerMultiSlotInfo.classData.type}</span>
-                            </div>
-                        `;
+                        reformerCell.innerHTML = '<span class="empty-cell">&nbsp;</span>';
                     }
                     reformerCell.onclick = null; // Disable clicking on occupied slots
                 } else {
